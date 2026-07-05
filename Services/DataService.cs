@@ -15,6 +15,10 @@ public class DataService
     private const string MentalLogsKey = "snooker_mental_logs";
     private const string OpponentsKey = "snooker_opponents";
     private const string TournamentsKey = "snooker_tournaments";
+    private const string CustomDrillsKey = "snooker_custom_drills";
+    private const string CustomDrillAttemptsKey = "snooker_custom_drill_attempts";
+    private const string BreakCompositionsKey = "snooker_break_compositions";
+    private const string DailyNotesKey = "snooker_daily_notes";
 
     public DataService(IJSRuntime js)
     {
@@ -187,6 +191,74 @@ public class DataService
         var list = await GetTournamentsAsync();
         list.RemoveAll(t => t.Id == id);
         await SetAsync(TournamentsKey, list);
+    }
+
+    // === Custom Drills ===
+    public async Task<List<CustomDrill>> GetCustomDrillsAsync()
+    {
+        return await GetAsync<List<CustomDrill>>(CustomDrillsKey) ?? new();
+    }
+
+    public async Task SaveCustomDrillAsync(CustomDrill drill)
+    {
+        var list = await GetCustomDrillsAsync();
+        var existing = list.FindIndex(d => d.Id == drill.Id);
+        if (existing >= 0) list[existing] = drill;
+        else list.Add(drill);
+        await SetAsync(CustomDrillsKey, list);
+    }
+
+    public async Task DeleteCustomDrillAsync(Guid id)
+    {
+        var list = await GetCustomDrillsAsync();
+        list.RemoveAll(d => d.Id == id);
+        await SetAsync(CustomDrillsKey, list);
+    }
+
+    public async Task<List<DrillAttempt>> GetCustomDrillAttemptsAsync(string drillId)
+    {
+        var all = await GetAsync<List<DrillAttempt>>(CustomDrillAttemptsKey) ?? new();
+        return all.Where(a => a.DrillId == drillId).OrderByDescending(a => a.Date).ToList();
+    }
+
+    public async Task SaveCustomDrillAttemptAsync(DrillAttempt attempt)
+    {
+        var all = await GetAsync<List<DrillAttempt>>(CustomDrillAttemptsKey) ?? new();
+        all.Add(attempt);
+        await SetAsync(CustomDrillAttemptsKey, all);
+    }
+
+    // === Break Compositions ===
+    public async Task<List<BreakComposition>> GetBreakCompositionsAsync()
+    {
+        return await GetAsync<List<BreakComposition>>(BreakCompositionsKey) ?? new();
+    }
+
+    public async Task SaveBreakCompositionAsync(BreakComposition comp)
+    {
+        var list = await GetBreakCompositionsAsync();
+        list.Add(comp);
+        await SetAsync(BreakCompositionsKey, list);
+    }
+
+    // === Daily Notes / Photos ===
+    public async Task<List<DailyNote>> GetDailyNotesAsync()
+    {
+        return await GetAsync<List<DailyNote>>(DailyNotesKey) ?? new();
+    }
+
+    public async Task SaveDailyNoteAsync(DailyNote note)
+    {
+        var list = await GetDailyNotesAsync();
+        list.Add(note);
+        await SetAsync(DailyNotesKey, list);
+    }
+
+    public async Task DeleteDailyNoteAsync(Guid id)
+    {
+        var list = await GetDailyNotesAsync();
+        list.RemoveAll(n => n.Id == id);
+        await SetAsync(DailyNotesKey, list);
     }
 
     // === Statistics ===

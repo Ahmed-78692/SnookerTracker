@@ -1,0 +1,109 @@
+@page "/gallery"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="gallery-page">
+    <h1>Photo Notes</h1>
+    <p class="page-subtitle">Capture table positions & technique</p>
+
+    @if (!showForm)
+    {
+        <button class="btn-add" @onclick="() => showForm = true">+ Add Photo Note</button>
+
+        <div class="notes-grid">
+            @foreach (var note in notes.OrderByDescending(n => n.Date))
+            {
+                <div class="note-card">
+                    @if (!string.IsNullOrEmpty(note.PhotoBase64))
+                    {
+                        <img class="note-img" src="@note.PhotoBase64" alt="@note.Caption" />
+                    }
+                    <div class="note-body">
+                        <span class="note-caption">@note.Caption</span>
+                        <span class="note-meta">@note.Date.ToString("MMM d") · @note.Category</span>
+                    </div>
+                    <button class="btn-del" @onclick="() => Delete(note.Id)">✕</button>
+                </div>
+            }
+        </div>
+
+        @if (!notes.Any())
+        {
+            <div class="empty-state">Take photos of tricky positions, your cue action, or setups you want to remember.</div>
+        }
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Photo</label>
+                <div class="photo-upload">
+                    <InputFile OnChange="HandlePhoto" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(currentNote.PhotoBase64))
+                    {
+                        <img class="photo-preview" src="@currentNote.PhotoBase64" alt="Preview" />
+                    }
+                    else
+                    {
+                        <div class="photo-placeholder">📷 Tap to take/upload photo</div>
+                    }
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Caption</label>
+                <input type="text" @bind="currentNote.Caption" placeholder="What is this about?" />
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select @bind="currentNote.Category">
+                    <option value="Table Position">Table Position</option>
+                    <option value="Technique">Technique</option>
+                    <option value="Setup">Drill Setup</option>
+                    <option value="Problem">Problem to Fix</option>
+                    <option value="Achievement">Achievement</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="Save">Save</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<DailyNote> notes = new();
+    private DailyNote currentNote = new() { Category = "Table Position" };
+    private bool showForm = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) { try { notes = await Data.GetDailyNotesAsync(); } catch { } StateHasChanged(); }
+    }
+
+    private async Task HandlePhoto(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file.Size > 5 * 1024 * 1024) return;
+        using var stream = file.OpenReadStream(5 * 1024 * 1024);
+        using var ms = new System.IO.MemoryStream();
+        await stream.CopyToAsync(ms);
+        currentNote.PhotoBase64 = $"data:{file.ContentType};base64,{Convert.ToBase64String(ms.ToArray())}";
+        StateHasChanged();
+    }
+
+    private async Task Save()
+    {
+        await Data.SaveDailyNoteAsync(currentNote);
+        notes = await Data.GetDailyNotesAsync();
+        currentNote = new() { Category = "Table Position" };
+        showForm = false;
+    }
+
+    private async Task Delete(Guid id)
+    {
+        await Data.DeleteDailyNoteAsync(id);
+        notes = await Data.GetDailyNotesAsync();
+    }
+}

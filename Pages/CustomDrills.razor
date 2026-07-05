@@ -1,0 +1,216 @@
+@page "/custom-drills"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+@inject IJSRuntime JS
+
+<div class="custom-drills-page">
+    <h1>My Drills</h1>
+    <p class="page-subtitle">Create your own drills with table photos</p>
+
+    @if (!showForm && selectedDrill == null)
+    {
+        <button class="btn-add" @onclick="() => { currentDrill = new(); showForm = true; }">+ Create New Drill</button>
+
+        <div class="drill-list">
+            @foreach (var drill in customDrills.OrderByDescending(d => d.CreatedDate))
+            {
+                <div class="drill-card" @onclick="() => SelectDrill(drill)">
+                    @if (!string.IsNullOrEmpty(drill.ImageBase64))
+                    {
+                        <img class="drill-thumb" src="@drill.ImageBase64" alt="@drill.Name" />
+                    }
+                    <div class="drill-info">
+                        <span class="drill-name">@drill.Name</span>
+                        <span class="drill-meta">@drill.Category · @drill.Difficulty · Target: @drill.TargetScore/@drill.MaxScore</span>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (!customDrills.Any())
+        {
+            <div class="empty-state">Create your own drills. Take a photo of the table setup and save it here.</div>
+        }
+    }
+    else if (showForm)
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Drill Name</label>
+                <input type="text" @bind="currentDrill.Name" placeholder="e.g., My Line-Up Variation" />
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea @bind="currentDrill.Description" placeholder="What is this drill about?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Category</label>
+                <select @bind="currentDrill.Category">
+                    @foreach (var cat in Enum.GetValues<DrillCategory>())
+                    {
+                        <option value="@cat">@cat</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Difficulty</label>
+                <select @bind="currentDrill.Difficulty">
+                    @foreach (var diff in Enum.GetValues<DrillDifficulty>())
+                    {
+                        <option value="@diff">@diff</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Instructions</label>
+                <textarea @bind="currentDrill.Instructions" placeholder="Step by step how to do this drill..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Target Score</label>
+                    <input type="number" @bind="currentDrill.TargetScore" min="1" />
+                </div>
+                <div class="form-group">
+                    <label>Max Score</label>
+                    <input type="number" @bind="currentDrill.MaxScore" min="1" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Table Photo / Screenshot</label>
+                <div class="photo-upload">
+                    <InputFile OnChange="HandlePhotoUpload" accept="image/*" />
+                    @if (!string.IsNullOrEmpty(currentDrill.ImageBase64))
+                    {
+                        <img class="photo-preview" src="@currentDrill.ImageBase64" alt="Preview" />
+                    }
+                    else
+                    {
+                        <div class="photo-placeholder">📷 Tap to upload table setup photo</div>
+                    }
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="SaveDrill">Save Drill</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+    else if (selectedDrill != null)
+    {
+        <button class="btn-back" @onclick="() => selectedDrill = null">← Back</button>
+        <div class="detail-view">
+            <h2>@selectedDrill.Name</h2>
+            <div class="detail-badges">
+                <span class="badge cat">@selectedDrill.Category</span>
+                <span class="badge diff">@selectedDrill.Difficulty</span>
+            </div>
+            @if (!string.IsNullOrEmpty(selectedDrill.ImageBase64))
+            {
+                <img class="detail-image" src="@selectedDrill.ImageBase64" alt="@selectedDrill.Name" />
+            }
+            <div class="detail-card">
+                <h3>Instructions</h3>
+                <p>@selectedDrill.Instructions</p>
+                <div class="score-info">
+                    <span>Target: <strong>@selectedDrill.TargetScore</strong></span>
+                    <span>Max: <strong>@selectedDrill.MaxScore</strong></span>
+                </div>
+            </div>
+
+            @if (!showAttemptForm)
+            {
+                <button class="btn-attempt" @onclick="() => showAttemptForm = true">+ Log Attempt</button>
+            }
+            else
+            {
+                <div class="form mini">
+                    <div class="form-group">
+                        <label>Score</label>
+                        <input type="number" @bind="attemptScore" min="0" max="@selectedDrill.MaxScore" />
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-save" @onclick="SaveAttempt">Save</button>
+                        <button class="btn-cancel" @onclick="() => showAttemptForm = false">Cancel</button>
+                    </div>
+                </div>
+            }
+
+            @if (attempts.Any())
+            {
+                <div class="attempts-section">
+                    <h3>History</h3>
+                    @foreach (var a in attempts.Take(10))
+                    {
+                        <div class="attempt-row">
+                            <span class="attempt-date">@a.Date.ToString("MMM d")</span>
+                            <div class="attempt-bar"><div class="attempt-fill" style="width: @((double)a.Score / selectedDrill.MaxScore * 100)%"></div></div>
+                            <span class="attempt-score">@a.Score</span>
+                        </div>
+                    }
+                </div>
+            }
+
+            <button class="btn-delete-drill" @onclick="DeleteDrill">Delete This Drill</button>
+        </div>
+    }
+</div>
+
+@code {
+    private List<CustomDrill> customDrills = new();
+    private CustomDrill currentDrill = new();
+    private CustomDrill? selectedDrill;
+    private List<DrillAttempt> attempts = new();
+    private bool showForm = false;
+    private bool showAttemptForm = false;
+    private int attemptScore = 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) { try { customDrills = await Data.GetCustomDrillsAsync(); } catch { } StateHasChanged(); }
+    }
+
+    private async Task HandlePhotoUpload(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file.Size > 5 * 1024 * 1024) return; // Max 5MB
+
+        using var stream = file.OpenReadStream(5 * 1024 * 1024);
+        using var ms = new System.IO.MemoryStream();
+        await stream.CopyToAsync(ms);
+        var base64 = Convert.ToBase64String(ms.ToArray());
+        currentDrill.ImageBase64 = $"data:{file.ContentType};base64,{base64}";
+        StateHasChanged();
+    }
+
+    private async Task SaveDrill()
+    {
+        if (string.IsNullOrWhiteSpace(currentDrill.Name)) return;
+        await Data.SaveCustomDrillAsync(currentDrill);
+        customDrills = await Data.GetCustomDrillsAsync();
+        currentDrill = new();
+        showForm = false;
+    }
+
+    private async Task SelectDrill(CustomDrill drill)
+    {
+        selectedDrill = drill;
+        attempts = await Data.GetCustomDrillAttemptsAsync(drill.Id.ToString());
+    }
+
+    private async Task SaveAttempt()
+    {
+        var attempt = new DrillAttempt { DrillId = selectedDrill!.Id.ToString(), Score = attemptScore };
+        await Data.SaveCustomDrillAttemptAsync(attempt);
+        attempts = await Data.GetCustomDrillAttemptsAsync(selectedDrill.Id.ToString());
+        showAttemptForm = false;
+        attemptScore = 0;
+    }
+
+    private async Task DeleteDrill()
+    {
+        await Data.DeleteCustomDrillAsync(selectedDrill!.Id);
+        customDrills = await Data.GetCustomDrillsAsync();
+        selectedDrill = null;
+    }
+}
