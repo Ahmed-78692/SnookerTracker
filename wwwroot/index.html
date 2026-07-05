@@ -43,6 +43,29 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         }
+
+        function vibrate(ms) {
+            if (navigator.vibrate) navigator.vibrate(ms);
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('snooker_theme', theme);
+        }
+
+        function getTheme() {
+            return localStorage.getItem('snooker_theme') || 'dark';
+        }
+
+        // Apply saved theme on load
+        (function() {
+            var theme = localStorage.getItem('snooker_theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+
+        function triggerFileInput() {
+            document.getElementById('import-file-input').click();
+        }
     </script>
 </body>
 

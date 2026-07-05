@@ -1,0 +1,86 @@
+@page "/calendar"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="calendar-page">
+    <h1>Practice Calendar</h1>
+    <div class="month-nav">
+        <button @onclick="PrevMonth">◀</button>
+        <span class="month-title">@currentMonth.ToString("MMMM yyyy")</span>
+        <button @onclick="NextMonth">▶</button>
+    </div>
+
+    <div class="cal-grid">
+        <span class="cal-day-header">M</span>
+        <span class="cal-day-header">T</span>
+        <span class="cal-day-header">W</span>
+        <span class="cal-day-header">T</span>
+        <span class="cal-day-header">F</span>
+        <span class="cal-day-header">S</span>
+        <span class="cal-day-header">S</span>
+
+        @foreach (var day in calendarDays)
+        {
+            <div class="cal-cell @(day.HasValue && practiceDates.Contains(day.Value) ? "practiced" : "") @(day.HasValue && day.Value == DateTime.Today ? "today" : "") @(!day.HasValue ? "empty" : "")">
+                @if (day.HasValue)
+                {
+                    <span>@day.Value.Day</span>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="cal-summary">
+        <div class="cal-stat">
+            <span class="cs-value">@practiceDaysThisMonth</span>
+            <span class="cs-label">Days this month</span>
+        </div>
+        <div class="cal-stat">
+            <span class="cs-value">@totalDaysInMonth</span>
+            <span class="cs-label">Total days</span>
+        </div>
+        <div class="cal-stat">
+            <span class="cs-value">@consistency%</span>
+            <span class="cs-label">Consistency</span>
+        </div>
+    </div>
+</div>
+
+@code {
+    private DateTime currentMonth = new(DateTime.Now.Year, DateTime.Now.Month, 1);
+    private HashSet<DateTime> practiceDates = new();
+    private List<DateTime?> calendarDays = new();
+
+    private int practiceDaysThisMonth => practiceDates.Count(d => d.Month == currentMonth.Month && d.Year == currentMonth.Year);
+    private int totalDaysInMonth => DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month);
+    private int consistency => totalDaysInMonth > 0 ? (int)((double)practiceDaysThisMonth / totalDaysInMonth * 100) : 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var sessions = await Data.GetSessionsAsync();
+                practiceDates = sessions.Select(s => s.Date.Date).ToHashSet();
+            }
+            catch { }
+            BuildCalendar();
+            StateHasChanged();
+        }
+    }
+
+    private void BuildCalendar()
+    {
+        calendarDays.Clear();
+        var firstDay = currentMonth;
+        int startOffset = ((int)firstDay.DayOfWeek + 6) % 7;
+        for (int i = 0; i < startOffset; i++) calendarDays.Add(null);
+        for (int d = 1; d <= DateTime.DaysInMonth(currentMonth.Year, currentMonth.Month); d++)
+            calendarDays.Add(new DateTime(currentMonth.Year, currentMonth.Month, d));
+    }
+
+    private void PrevMonth() { currentMonth = currentMonth.AddMonths(-1); BuildCalendar(); }
+    private void NextMonth() { currentMonth = currentMonth.AddMonths(1); BuildCalendar(); }
+}

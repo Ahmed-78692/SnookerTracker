@@ -1,0 +1,147 @@
+@page "/break-heatmap"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="heatmap-page">
+    <h1>Break Composition</h1>
+    <p class="page-subtitle">Which colors are you scoring with?</p>
+
+    @if (!showForm)
+    {
+        <button class="btn-add" @onclick="() => showForm = true">+ Log Break Composition</button>
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Total Break Score</label>
+                <input type="number" @bind="current.TotalScore" min="1" max="147" />
+            </div>
+            <div class="form-group">
+                <label>Reds scored with Black (7)</label>
+                <input type="number" @bind="current.RedsWithBlack" min="0" max="15" />
+            </div>
+            <div class="form-group">
+                <label>Reds scored with Pink (6)</label>
+                <input type="number" @bind="current.RedsWithPink" min="0" max="15" />
+            </div>
+            <div class="form-group">
+                <label>Reds scored with Blue (5)</label>
+                <input type="number" @bind="current.RedsWithBlue" min="0" max="15" />
+            </div>
+            <div class="form-group">
+                <label>Reds scored with Brown (4)</label>
+                <input type="number" @bind="current.RedsWithBrown" min="0" max="15" />
+            </div>
+            <div class="form-group">
+                <label>Reds scored with Green (3)</label>
+                <input type="number" @bind="current.RedsWithGreen" min="0" max="15" />
+            </div>
+            <div class="form-group">
+                <label>Reds scored with Yellow (2)</label>
+                <input type="number" @bind="current.RedsWithYellow" min="0" max="15" />
+            </div>
+            <div class="form-group">
+                <label>Where did the break end?</label>
+                <select @bind="current.BreakdownReason">
+                    <option value="">Still going / Clearance</option>
+                    <option value="Missed Pot">Missed Pot</option>
+                    <option value="Bad Position">Bad Position (no shot)</option>
+                    <option value="Safety Error">Went safe by mistake</option>
+                    <option value="In-off">In-off / Foul</option>
+                    <option value="Kick">Kick / Bad contact</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="Save">Save</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (compositions.Any())
+    {
+        <div class="heatmap-card">
+            <h2>Color Usage (All Breaks)</h2>
+            <div class="color-bars">
+                @foreach (var (name, count, color, pct) in GetColorStats())
+                {
+                    <div class="color-row">
+                        <span class="color-dot" style="background: @color"></span>
+                        <span class="color-name">@name</span>
+                        <div class="color-bar"><div class="color-fill" style="width: @pct%; background: @color"></div></div>
+                        <span class="color-count">@count</span>
+                    </div>
+                }
+            </div>
+            <p class="insight">@GetInsight()</p>
+        </div>
+
+        <div class="heatmap-card">
+            <h2>Breakdown Reasons</h2>
+            <div class="breakdown-list">
+                @foreach (var group in compositions.Where(c => !string.IsNullOrEmpty(c.BreakdownReason)).GroupBy(c => c.BreakdownReason).OrderByDescending(g => g.Count()))
+                {
+                    var pct = (double)group.Count() / compositions.Count(c => !string.IsNullOrEmpty(c.BreakdownReason)) * 100;
+                    <div class="breakdown-row">
+                        <span class="bd-name">@group.Key</span>
+                        <div class="bd-bar"><div class="bd-fill" style="width: @pct%"></div></div>
+                        <span class="bd-count">@group.Count()</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<BreakComposition> compositions = new();
+    private BreakComposition current = new() { TotalScore = 50 };
+    private bool showForm = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) { try { compositions = await Data.GetBreakCompositionsAsync(); } catch { } StateHasChanged(); }
+    }
+
+    private async Task Save()
+    {
+        await Data.SaveBreakCompositionAsync(current);
+        compositions = await Data.GetBreakCompositionsAsync();
+        current = new() { TotalScore = 50 };
+        showForm = false;
+    }
+
+    private List<(string name, int count, string color, double pct)> GetColorStats()
+    {
+        var black = compositions.Sum(c => c.RedsWithBlack);
+        var pink = compositions.Sum(c => c.RedsWithPink);
+        var blue = compositions.Sum(c => c.RedsWithBlue);
+        var brown = compositions.Sum(c => c.RedsWithBrown);
+        var green = compositions.Sum(c => c.RedsWithGreen);
+        var yellow = compositions.Sum(c => c.RedsWithYellow);
+        var max = Math.Max(1, new[] { black, pink, blue, brown, green, yellow }.Max());
+
+        return new()
+        {
+            ("Black (7)", black, "#1a1a1a", (double)black / max * 100),
+            ("Pink (6)", pink, "#e84393", (double)pink / max * 100),
+            ("Blue (5)", blue, "#2980b9", (double)blue / max * 100),
+            ("Brown (4)", brown, "#8B4513", (double)brown / max * 100),
+            ("Green (3)", green, "#2ecc40", (double)green / max * 100),
+            ("Yellow (2)", yellow, "#FFD700", (double)yellow / max * 100),
+        };
+    }
+
+    private string GetInsight()
+    {
+        var stats = GetColorStats();
+        var total = stats.Sum(s => s.count);
+        if (total == 0) return "Log more breaks to get insights.";
+        var blackPct = total > 0 ? (double)stats[0].count / total * 100 : 0;
+        if (blackPct > 70) return "⚠️ You're heavily reliant on black. Practice getting on pink and blue more — pros use all colors.";
+        if (blackPct > 50) return "Good mix but slightly black-heavy. Try the Pink-Black Rotation drill.";
+        return "✅ Great color variety! You're using the full table well.";
+    }
+}

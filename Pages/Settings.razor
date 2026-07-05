@@ -1,5 +1,6 @@
 @page "/settings"
 @using SnookerTracker.Services
+@using Microsoft.AspNetCore.Components.Forms
 @inject DataService Data
 @inject IJSRuntime JS
 
@@ -7,9 +8,30 @@
     <h1>⚙️ Settings</h1>
 
     <div class="section">
+        <h2>Theme</h2>
+        <div class="theme-toggle">
+            <button class="theme-btn @(currentTheme == "dark" ? "active" : "")" @onclick="SetDark">🌙 Dark</button>
+            <button class="theme-btn @(currentTheme == "light" ? "active" : "")" @onclick="SetLight">☀️ Light</button>
+        </div>
+    </div>
+
+    <div class="section">
         <h2>Export / Backup</h2>
         <p class="section-desc">Download all your data as a JSON file. Keep it safe!</p>
         <button class="btn-export" @onclick="ExportData">📥 Export All Data</button>
+    </div>
+
+    <div class="section">
+        <h2>Import / Restore</h2>
+        <p class="section-desc">Restore from a previously exported backup file.</p>
+        <div class="import-area">
+            <InputFile OnChange="HandleImport" accept=".json" />
+            <div class="import-placeholder">📂 Tap to select backup file (.json)</div>
+        </div>
+        @if (!string.IsNullOrEmpty(importStatus))
+        {
+            <p class="import-status @(importSuccess ? "success" : "error")">@importStatus</p>
+        }
     </div>
 
     <div class="section">
@@ -69,13 +91,55 @@
 
 @code {
     private WeeklySummary? weeklySummary;
+    private string currentTheme = "dark";
+    private string importStatus = "";
+    private bool importSuccess = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
+            try { currentTheme = await JS.InvokeAsync<string>("getTheme"); } catch { }
             await LoadWeeklySummary();
             StateHasChanged();
+        }
+    }
+
+    private async Task SetTheme(string theme)
+    {
+        currentTheme = theme;
+        await JS.InvokeVoidAsync("setTheme", theme);
+    }
+
+    private async Task SetDark() => await SetTheme("dark");
+    private async Task SetLight() => await SetTheme("light");
+
+    private async Task HandleImport(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            var file = e.File;
+            using var stream = file.OpenReadStream(10 * 1024 * 1024);
+            using var reader = new System.IO.StreamReader(stream);
+            var json = await reader.ReadToEndAsync();
+
+            var keys = new[] { "snooker_sessions", "snooker_breaks", "snooker_drill_attempts", "snooker_goals", "snooker_matches", "snooker_mental_logs", "snooker_opponents", "snooker_tournaments", "snooker_custom_drills", "snooker_daily_notes", "snooker_break_compositions" };
+            var doc = System.Text.Json.JsonDocument.Parse(json);
+
+            foreach (var key in keys)
+            {
+                if (doc.RootElement.TryGetProperty(key.Replace("snooker_", ""), out var val))
+                {
+                    await JS.InvokeVoidAsync("localStorage.setItem", key, val.GetRawText());
+                }
+            }
+            importStatus = "✓ Backup restored successfully! Refresh the app.";
+            importSuccess = true;
+        }
+        catch
+        {
+            importStatus = "✗ Failed to import. Make sure it's a valid backup file.";
+            importSuccess = false;
         }
     }
 

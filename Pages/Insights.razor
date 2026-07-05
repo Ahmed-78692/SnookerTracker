@@ -1,0 +1,133 @@
+@page "/insights"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="insights-page">
+    <h1>Insights & Recommendations</h1>
+
+    @if (sessions.Any())
+    {
+        <div class="insight-card recommend">
+            <h2>🎯 Drill Recommendations</h2>
+            <p class="insight-intro">Based on your session ratings, focus on:</p>
+            <div class="rec-list">
+                @foreach (var rec in GetRecommendations())
+                {
+                    <div class="rec-item">
+                        <span class="rec-area">@rec.area</span>
+                        <span class="rec-drill">→ @rec.drill</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="insight-card compare">
+            <h2>📊 This Week vs Last Week</h2>
+            <div class="compare-grid">
+                <div class="compare-item">
+                    <span class="comp-label">Sessions</span>
+                    <span class="comp-this">@thisWeekSessions</span>
+                    <span class="comp-vs">vs</span>
+                    <span class="comp-last">@lastWeekSessions</span>
+                    <span class="comp-trend @(thisWeekSessions >= lastWeekSessions ? "up" : "down")">@(thisWeekSessions >= lastWeekSessions ? "↑" : "↓")</span>
+                </div>
+                <div class="compare-item">
+                    <span class="comp-label">Avg Break</span>
+                    <span class="comp-this">@thisWeekAvgBreak</span>
+                    <span class="comp-vs">vs</span>
+                    <span class="comp-last">@lastWeekAvgBreak</span>
+                    <span class="comp-trend @(thisWeekAvgBreak >= lastWeekAvgBreak ? "up" : "down")">@(thisWeekAvgBreak >= lastWeekAvgBreak ? "↑" : "↓")</span>
+                </div>
+                <div class="compare-item">
+                    <span class="comp-label">Minutes</span>
+                    <span class="comp-this">@thisWeekMinutes</span>
+                    <span class="comp-vs">vs</span>
+                    <span class="comp-last">@lastWeekMinutes</span>
+                    <span class="comp-trend @(thisWeekMinutes >= lastWeekMinutes ? "up" : "down")">@(thisWeekMinutes >= lastWeekMinutes ? "↑" : "↓")</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="insight-card milestones">
+            <h2>🏁 Progress Milestones</h2>
+            <div class="milestone-list">
+                @foreach (var m in GetMilestones())
+                {
+                    <div class="milestone-item">
+                        <div class="ms-info">
+                            <span class="ms-name">@m.name</span>
+                            <span class="ms-detail">@m.current / @m.target</span>
+                        </div>
+                        <div class="ms-bar"><div class="ms-fill" style="width: @m.pct%"></div></div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">Start logging sessions to get personalized recommendations.</div>
+    }
+</div>
+
+@code {
+    private List<PracticeSession> sessions = new();
+    private List<BreakRecord> breaks = new();
+
+    private int thisWeekSessions => sessions.Count(s => s.Date >= DateTime.Now.AddDays(-7));
+    private int lastWeekSessions => sessions.Count(s => s.Date >= DateTime.Now.AddDays(-14) && s.Date < DateTime.Now.AddDays(-7));
+    private int thisWeekAvgBreak => breaks.Where(b => b.Date >= DateTime.Now.AddDays(-7)).Any() ? (int)breaks.Where(b => b.Date >= DateTime.Now.AddDays(-7)).Average(b => b.Score) : 0;
+    private int lastWeekAvgBreak => breaks.Where(b => b.Date >= DateTime.Now.AddDays(-14) && b.Date < DateTime.Now.AddDays(-7)).Any() ? (int)breaks.Where(b => b.Date >= DateTime.Now.AddDays(-14) && b.Date < DateTime.Now.AddDays(-7)).Average(b => b.Score) : 0;
+    private int thisWeekMinutes => sessions.Where(s => s.Date >= DateTime.Now.AddDays(-7)).Sum(s => s.DurationMinutes);
+    private int lastWeekMinutes => sessions.Where(s => s.Date >= DateTime.Now.AddDays(-14) && s.Date < DateTime.Now.AddDays(-7)).Sum(s => s.DurationMinutes);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) { try { sessions = await Data.GetSessionsAsync(); breaks = await Data.GetBreaksAsync(); } catch { } StateHasChanged(); }
+    }
+
+    private List<(string area, string drill)> GetRecommendations()
+    {
+        var recs = new List<(string, string)>();
+        if (!sessions.Any()) return recs;
+        var last5 = sessions.OrderByDescending(s => s.Date).Take(5).ToList();
+        var avgPot = last5.Average(s => s.PottingRating);
+        var avgSafe = last5.Average(s => s.SafetyRating);
+        var avgPos = last5.Average(s => s.PositionalRating);
+        var avgFocus = last5.Average(s => s.FocusRating);
+
+        var weakest = new[] { ("Potting", avgPot), ("Safety", avgSafe), ("Position", avgPos), ("Focus", avgFocus) }
+            .OrderBy(x => x.Item2).Take(2);
+
+        foreach (var (area, _) in weakest)
+        {
+            var drill = area switch
+            {
+                "Potting" => "Long Pots from Baulk, Pressure Potting",
+                "Safety" => "Safety Battle Simulation, Baulk Return",
+                "Position" => "T Drill, Three-Cushion Position",
+                "Focus" => "Endurance Scoring (60 min), Century Under Pressure",
+                _ => "Line-Up drill"
+            };
+            recs.Add((area, drill));
+        }
+        return recs;
+    }
+
+    private List<(string name, int current, int target, double pct)> GetMilestones()
+    {
+        var highest = breaks.Any() ? breaks.Max(b => b.Score) : 0;
+        var totalHours = sessions.Sum(s => s.DurationMinutes) / 60;
+        var centuries = breaks.Count(b => b.IsCentury);
+
+        return new()
+        {
+            ("First Century (100+ break)", Math.Min(highest, 100), 100, Math.Min(100, highest)),
+            ("Pro Long Pot Rate (60%+)", Math.Min((int)(sessions.Any() ? sessions.Average(s => s.PottingRating) * 10 : 0), 60), 60, sessions.Any() ? Math.Min(100, sessions.Average(s => s.PottingRating) * 10 / 60 * 100) : 0),
+            ("100 Hours Practice", Math.Min(totalHours, 100), 100, Math.Min(100, totalHours)),
+            ("500 Hours Practice", Math.Min(totalHours, 500), 500, Math.Min(100, (double)totalHours / 500 * 100)),
+            ("10 Centuries", Math.Min(centuries, 10), 10, Math.Min(100, centuries * 10.0)),
+        };
+    }
+}

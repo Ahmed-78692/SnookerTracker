@@ -112,3 +112,24 @@ input:focus, textarea:focus, select:focus {
 .invalid {
     outline: 1px solid var(--danger);
 }
+
+/* Light Theme */
+[data-theme="light"] {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f1f5f9;
+    --border: #e2e8f0;
+    --accent: #059669;
+    --accent-dim: rgba(5, 150, 105, 0.1);
+    --accent-glow: rgba(5, 150, 105, 0.3);
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+    --danger: #dc2626;
+    --warning: #d97706;
+    --success: #059669;
+    --info: #2563eb;
+    --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
