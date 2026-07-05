@@ -1,0 +1,57 @@
+@page "/training"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+
+<div class="training-page">
+    <h1>Training Plan</h1>
+    <p class="page-subtitle">Structured path to international level</p>
+
+    @foreach (var plan in plans)
+    {
+        <div class="plan-card @(selectedPlan?.Id == plan.Id ? "expanded" : "")" @onclick="() => TogglePlan(plan)">
+            <div class="plan-header">
+                <div>
+                    <span class="plan-phase @plan.Phase.ToString().ToLower()">@plan.Phase</span>
+                    <h2>@plan.Name</h2>
+                    <p class="plan-desc">@plan.Description</p>
+                </div>
+                <span class="plan-arrow">@(selectedPlan?.Id == plan.Id ? "▾" : "▸")</span>
+            </div>
+
+            @if (selectedPlan?.Id == plan.Id)
+            {
+                <div class="plan-days">
+                    @foreach (var day in plan.Days)
+                    {
+                        <div class="day-card">
+                            <div class="day-header">
+                                <span class="day-name">@day.DayName</span>
+                                <span class="day-duration">@day.TargetMinutes min</span>
+                            </div>
+                            <span class="day-focus">@day.Focus</span>
+                            <div class="day-drills">
+                                @foreach (var drill in day.Drills)
+                                {
+                                    <div class="planned-drill">
+                                        <span class="pd-name">@drill.DrillName</span>
+                                        <span class="pd-meta">@drill.DurationMinutes min · @drill.Sets sets</span>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<TrainingPlan> plans = TrainingPlanService.GetAllPlans();
+    private TrainingPlan? selectedPlan;
+
+    private void TogglePlan(TrainingPlan plan)
+    {
+        selectedPlan = selectedPlan?.Id == plan.Id ? null : plan;
+    }
+}

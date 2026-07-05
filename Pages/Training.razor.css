@@ -1,0 +1,26 @@
+.training-page { display: flex; flex-direction: column; gap: 1rem; }
+.training-page h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
+.page-subtitle { color: var(--text-muted); font-size: 0.8rem; margin-top: -0.5rem; }
+.plan-card { background: var(--bg-card); border-radius: var(--radius-sm); padding: 1.1rem; border: 1px solid var(--border); cursor: pointer; transition: all 0.2s; }
+.plan-card.expanded { border-color: var(--accent); }
+.plan-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.plan-header h2 { color: var(--text-primary); font-size: 1rem; margin: 0.3rem 0 0.2rem; }
+.plan-desc { color: var(--text-muted); font-size: 0.8rem; line-height: 1.4; }
+.plan-phase { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; padding: 0.2rem 0.5rem; border-radius: 8px; }
+.plan-phase.foundation { background: rgba(59, 130, 246, 0.15); color: var(--info); }
+.plan-phase.development { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+.plan-phase.breakbuilding { background: rgba(139, 92, 246, 0.15); color: #8b5cf6; }
+.plan-phase.matchprep { background: rgba(239, 68, 68, 0.15); color: var(--danger); }
+.plan-phase.tournament { background: rgba(0, 212, 170, 0.15); color: var(--accent); }
+.plan-arrow { color: var(--text-muted); font-size: 1.2rem; }
+.plan-days { margin-top: 1rem; display: flex; flex-direction: column; gap: 0.6rem; border-top: 1px solid var(--border); padding-top: 1rem; }
+.day-card { background: var(--bg-secondary); border-radius: var(--radius-xs); padding: 0.85rem; }
+.day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem; }
+.day-name { color: var(--text-primary); font-weight: 700; font-size: 0.85rem; }
+.day-duration { color: var(--text-muted); font-size: 0.72rem; font-weight: 600; background: var(--bg-card); padding: 0.15rem 0.4rem; border-radius: 4px; }
+.day-focus { color: var(--accent); font-size: 0.75rem; font-weight: 600; }
+.day-drills { margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem; }
+.planned-drill { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0; border-bottom: 1px solid var(--border); }
+.planned-drill:last-child { border-bottom: none; }
+.pd-name { color: var(--text-secondary); font-size: 0.78rem; font-weight: 500; }
+.pd-meta { color: var(--text-muted); font-size: 0.68rem; }

@@ -12,6 +12,7 @@ public class DataService
     private const string DrillAttemptsKey = "snooker_drill_attempts";
     private const string GoalsKey = "snooker_goals";
     private const string MatchesKey = "snooker_matches";
+    private const string MentalLogsKey = "snooker_mental_logs";
 
     public DataService(IJSRuntime js)
     {
@@ -127,6 +128,19 @@ public class DataService
         var matches = await GetMatchesAsync();
         matches.RemoveAll(m => m.Id == id);
         await SetAsync(MatchesKey, matches);
+    }
+
+    // === Mental Logs ===
+    public async Task<List<MentalLog>> GetMentalLogsAsync()
+    {
+        return await GetAsync<List<MentalLog>>(MentalLogsKey) ?? new();
+    }
+
+    public async Task SaveMentalLogAsync(MentalLog log)
+    {
+        var logs = await GetMentalLogsAsync();
+        logs.Add(log);
+        await SetAsync(MentalLogsKey, logs);
     }
 
     // === Statistics ===

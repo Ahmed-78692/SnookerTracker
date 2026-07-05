@@ -1,0 +1,50 @@
+.more-page { display: flex; flex-direction: column; gap: 1.25rem; }
+.more-page h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
+
+.menu-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    padding: 1rem 1.1rem;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.menu-item:active {
+    border-color: var(--accent);
+    transform: scale(0.98);
+}
+
+.menu-icon {
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xs);
+}
+
+.menu-title {
+    color: var(--text-primary);
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: block;
+}
+
+.menu-desc {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    display: block;
+    margin-top: 0.1rem;
+}

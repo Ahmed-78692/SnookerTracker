@@ -1,0 +1,57 @@
+@page "/achievements"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject AchievementService AchievementSvc
+
+<div class="achievements-page">
+    <h1>Achievements</h1>
+    <p class="page-subtitle">@unlockedCount / @totalCount unlocked</p>
+
+    <div class="progress-overview">
+        <div class="progress-bar-full">
+            <div class="progress-fill-full" style="width: @progressPct%"></div>
+        </div>
+    </div>
+
+    <div class="tier-section" >
+        @foreach (var tier in Enum.GetValues<AchievementTier>())
+        {
+            var tierAchievements = achievements.Where(a => a.Tier == tier).ToList();
+            if (tierAchievements.Any())
+            {
+                <h2 class="tier-title @tier.ToString().ToLower()">@tier</h2>
+                <div class="achievements-grid">
+                    @foreach (var a in tierAchievements)
+                    {
+                        <div class="achievement-card @(a.IsUnlocked ? "unlocked" : "locked") @a.Tier.ToString().ToLower()">
+                            <span class="ach-icon">@a.Icon</span>
+                            <span class="ach-name">@a.Name</span>
+                            <span class="ach-desc">@a.Description</span>
+                            @if (a.IsUnlocked)
+                            {
+                                <span class="ach-badge">✓</span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    private List<Achievement> achievements = new();
+    private int unlockedCount => achievements.Count(a => a.IsUnlocked);
+    private int totalCount => achievements.Count;
+    private double progressPct => totalCount > 0 ? (double)unlockedCount / totalCount * 100 : 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try { achievements = await AchievementSvc.CheckAchievementsAsync(); }
+            catch { achievements = new(); }
+            StateHasChanged();
+        }
+    }
+}

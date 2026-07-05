@@ -1,0 +1,125 @@
+@page "/mental"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="mental-page">
+    <h1>Mental Game</h1>
+    <p class="page-subtitle">Champions are built in the mind first</p>
+
+    @if (!showForm)
+    {
+        <button class="btn-add" @onclick="() => showForm = true">+ Log Mental State</button>
+
+        @if (logs.Any())
+        {
+            <div class="avg-stats">
+                <div class="avg-card">
+                    <span class="avg-value">@AvgConfidence</span>
+                    <span class="avg-label">Confidence</span>
+                </div>
+                <div class="avg-card">
+                    <span class="avg-value">@AvgFocus</span>
+                    <span class="avg-label">Focus</span>
+                </div>
+                <div class="avg-card">
+                    <span class="avg-value">@AvgPressure</span>
+                    <span class="avg-label">Pressure</span>
+                </div>
+                <div class="avg-card">
+                    <span class="avg-value">@AvgEnjoyment</span>
+                    <span class="avg-label">Enjoyment</span>
+                </div>
+            </div>
+        }
+
+        <div class="logs-list">
+            @foreach (var log in logs.OrderByDescending(l => l.Date).Take(10))
+            {
+                <div class="log-card">
+                    <div class="log-date">@log.Date.ToString("ddd, MMM d")</div>
+                    <div class="log-scores">
+                        <span class="score-pill">🧠 @log.Confidence</span>
+                        <span class="score-pill">🎯 @log.Focus</span>
+                        <span class="score-pill">💎 @log.PressureHandling</span>
+                        <span class="score-pill">😊 @log.Enjoyment</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(log.KeyLearning))
+                    {
+                        <div class="log-learning">💡 @log.KeyLearning</div>
+                    }
+                </div>
+            }
+        </div>
+
+        @if (!logs.Any())
+        {
+            <div class="empty-state">Track your mental state to find patterns in your best performances.</div>
+        }
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Confidence (1-10)</label>
+                <input type="range" @bind="newLog.Confidence" min="1" max="10" />
+                <span class="range-value">@newLog.Confidence</span>
+            </div>
+            <div class="form-group">
+                <label>Focus (1-10)</label>
+                <input type="range" @bind="newLog.Focus" min="1" max="10" />
+                <span class="range-value">@newLog.Focus</span>
+            </div>
+            <div class="form-group">
+                <label>Pressure Handling (1-10)</label>
+                <input type="range" @bind="newLog.PressureHandling" min="1" max="10" />
+                <span class="range-value">@newLog.PressureHandling</span>
+            </div>
+            <div class="form-group">
+                <label>Enjoyment (1-10)</label>
+                <input type="range" @bind="newLog.Enjoyment" min="1" max="10" />
+                <span class="range-value">@newLog.Enjoyment</span>
+            </div>
+            <div class="form-group">
+                <label>Pre-Session Mindset</label>
+                <textarea @bind="newLog.PreSessionMindset" placeholder="How are you feeling before practice?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Key Learning</label>
+                <textarea @bind="newLog.KeyLearning" placeholder="What's the one thing you learned today?"></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="Save">Save</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<MentalLog> logs = new();
+    private MentalLog newLog = new() { Confidence = 5, Focus = 5, PressureHandling = 5, Enjoyment = 7 };
+    private bool showForm = false;
+
+    private string AvgConfidence => logs.Any() ? $"{logs.Average(l => l.Confidence):F1}" : "—";
+    private string AvgFocus => logs.Any() ? $"{logs.Average(l => l.Focus):F1}" : "—";
+    private string AvgPressure => logs.Any() ? $"{logs.Average(l => l.PressureHandling):F1}" : "—";
+    private string AvgEnjoyment => logs.Any() ? $"{logs.Average(l => l.Enjoyment):F1}" : "—";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try { logs = await Data.GetMentalLogsAsync(); } catch { }
+            StateHasChanged();
+        }
+    }
+
+    private async Task Save()
+    {
+        await Data.SaveMentalLogAsync(newLog);
+        logs = await Data.GetMentalLogsAsync();
+        newLog = new() { Confidence = 5, Focus = 5, PressureHandling = 5, Enjoyment = 7 };
+        showForm = false;
+    }
+}

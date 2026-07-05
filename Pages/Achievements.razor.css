@@ -1,0 +1,22 @@
+.achievements-page { display: flex; flex-direction: column; gap: 1rem; }
+.achievements-page h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
+.page-subtitle { color: var(--text-muted); font-size: 0.8rem; margin-top: -0.5rem; }
+.progress-overview { margin-bottom: 0.5rem; }
+.progress-bar-full { height: 8px; background: var(--bg-card); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+.progress-fill-full { height: 100%; background: linear-gradient(90deg, var(--accent), #00f5d4); border-radius: 4px; transition: width 0.5s; }
+.tier-title { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin: 0.5rem 0 0.4rem; }
+.tier-title.bronze { color: #cd7f32; }
+.tier-title.silver { color: #c0c0c0; }
+.tier-title.gold { color: #ffd700; }
+.tier-title.diamond { color: #b9f2ff; }
+.achievements-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.6rem; }
+.achievement-card { background: var(--bg-card); border-radius: var(--radius-sm); padding: 1rem 0.75rem; border: 1px solid var(--border); text-align: center; position: relative; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; transition: all 0.2s; }
+.achievement-card.locked { opacity: 0.4; filter: grayscale(1); }
+.achievement-card.unlocked.bronze { border-color: rgba(205, 127, 50, 0.4); }
+.achievement-card.unlocked.silver { border-color: rgba(192, 192, 192, 0.4); }
+.achievement-card.unlocked.gold { border-color: rgba(255, 215, 0, 0.4); background: linear-gradient(135deg, var(--bg-card), rgba(255, 215, 0, 0.05)); }
+.achievement-card.unlocked.diamond { border-color: rgba(185, 242, 255, 0.4); background: linear-gradient(135deg, var(--bg-card), rgba(185, 242, 255, 0.05)); }
+.ach-icon { font-size: 1.8rem; }
+.ach-name { color: var(--text-primary); font-size: 0.78rem; font-weight: 700; }
+.ach-desc { color: var(--text-muted); font-size: 0.65rem; line-height: 1.3; }
+.ach-badge { position: absolute; top: 0.4rem; right: 0.4rem; background: var(--accent); color: var(--bg-primary); width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 800; }
