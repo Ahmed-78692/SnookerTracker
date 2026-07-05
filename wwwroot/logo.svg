@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#0a0e1a"/>
+  <circle cx="256" cy="256" r="235" fill="none" stroke="#00d4aa" stroke-width="3" opacity="0.3"/>
+  
+  <!-- Table green felt base -->
+  <ellipse cx="256" cy="280" rx="160" ry="80" fill="#0d6b32" opacity="0.3"/>
+  
+  <!-- Snooker balls triangle -->
+  <!-- Red balls -->
+  <circle cx="230" cy="230" r="18" fill="#e74c3c"/>
+  <circle cx="260" cy="218" r="18" fill="#e74c3c"/>
+  <circle cx="290" cy="230" r="18" fill="#e74c3c"/>
+  <circle cx="245" cy="252" r="18" fill="#e74c3c"/>
+  <circle cx="275" cy="252" r="18" fill="#e74c3c"/>
+  <circle cx="260" cy="275" r="18" fill="#e74c3c"/>
+  
+  <!-- Black ball (featured) -->
+  <circle cx="260" cy="320" r="22" fill="#1a1a2e"/>
+  <circle cx="260" cy="320" r="21" fill="none" stroke="#333" stroke-width="1"/>
+  <circle cx="252" cy="312" r="5" fill="rgba(255,255,255,0.15)"/>
+  
+  <!-- Cue stick -->
+  <rect x="80" y="160" width="8" height="200" rx="4" fill="#c8a45c" transform="rotate(-35, 180, 260)"/>
+  <rect x="80" y="155" width="8" height="20" rx="4" fill="#f5e6c8" transform="rotate(-35, 180, 260)"/>
+  <rect x="80" y="340" width="8" height="30" rx="4" fill="#2c1810" transform="rotate(-35, 180, 260)"/>
+  
+  <!-- Accent glow behind black ball -->
+  <circle cx="260" cy="320" r="30" fill="none" stroke="#00d4aa" stroke-width="1.5" opacity="0.4"/>
+  
+  <!-- Text -->
+  <text x="256" y="410" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="36" font-weight="800" fill="#ffffff" letter-spacing="-1">SNOOKER</text>
+  <text x="256" y="445" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="600" fill="#00d4aa" letter-spacing="4">TRACKER</text>
+</svg>

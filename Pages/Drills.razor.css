@@ -316,3 +316,28 @@
     padding: 2rem 1rem;
     font-size: 0.85rem;
 }
+
+.objective-card, .why-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    padding: 1.1rem;
+    border: 1px solid var(--border);
+}
+
+.objective-card { border-left: 3px solid var(--accent); }
+.why-card { border-left: 3px solid var(--warning); }
+
+.objective-card h3, .why-card h3 {
+    font-size: 0.82rem;
+    margin-bottom: 0.4rem;
+    font-weight: 700;
+}
+
+.objective-card h3 { color: var(--accent); }
+.why-card h3 { color: var(--warning); }
+
+.objective-card p, .why-card p {
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+    line-height: 1.55;
+}

@@ -5,10 +5,15 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#1a1a2e",
-  "theme_color": "#1a1a2e",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
   "prefer_related_applications": false,
   "icons": [
+    {
+      "src": "app-icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    },
     {
       "src": "icon-192.png",
       "type": "image/png",

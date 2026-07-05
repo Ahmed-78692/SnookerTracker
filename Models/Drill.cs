@@ -13,6 +13,8 @@ public class Drill
     public int TargetScore { get; set; }
     public int MaxScore { get; set; }
     public DrillTableSetup? TableSetup { get; set; }
+    public string Objective { get; set; } = string.Empty;
+    public string WhyItHelps { get; set; } = string.Empty;
 }
 
 public class DrillTableSetup

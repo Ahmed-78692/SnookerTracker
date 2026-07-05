@@ -58,6 +58,22 @@
                 </div>
             </div>
 
+            @if (!string.IsNullOrEmpty(selectedDrill.Objective))
+            {
+                <div class="objective-card">
+                    <h3>🎯 Practice Objective</h3>
+                    <p>@selectedDrill.Objective</p>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(selectedDrill.WhyItHelps))
+            {
+                <div class="why-card">
+                    <h3>💡 Why This Drill Helps</h3>
+                    <p>@selectedDrill.WhyItHelps</p>
+                </div>
+            }
+
             @if (selectedDrill.TableSetup != null)
             {
                 <div class="table-diagram">

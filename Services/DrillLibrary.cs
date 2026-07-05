@@ -5,8 +5,10 @@ namespace SnookerTracker.Services;
 
 public static class DrillLibrary
 {
-    public static List<Drill> GetAllDrills() => new()
+    public static List<Drill> GetAllDrills()
     {
+        var drills = new List<Drill>
+        {
         // === POTTING DRILLS ===
         new Drill
         {
@@ -877,6 +879,17 @@ public static class DrillLibrary
             }
         }
     };
+
+        // Apply metadata to all drills
+        foreach (var drill in drills)
+        {
+            var (objective, whyItHelps) = DrillMetadata.GetMetadata(drill.Id);
+            drill.Objective = objective;
+            drill.WhyItHelps = whyItHelps;
+        }
+
+        return drills;
+    }
 
     private static List<BallPosition> GenerateLineUpBalls()
     {
