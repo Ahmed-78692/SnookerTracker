@@ -1,0 +1,95 @@
+@page "/opponents"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="opponents-page">
+    <h1>Opponent Scouting</h1>
+
+    @if (!showForm)
+    {
+        <button class="btn-add" @onclick="StartNew">+ Add Opponent</button>
+
+        <div class="opp-list">
+            @foreach (var opp in opponents.OrderByDescending(o => o.LastPlayed))
+            {
+                <div class="opp-card" @onclick="() => Edit(opp)">
+                    <div class="opp-header">
+                        <span class="opp-name">@opp.Name</span>
+                        <span class="opp-date">@opp.LastPlayed.ToString("MMM d")</span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(opp.Weaknesses))
+                    {
+                        <div class="opp-detail"><span class="opp-label">Weak:</span> @opp.Weaknesses</div>
+                    }
+                    @if (!string.IsNullOrEmpty(opp.Tactics))
+                    {
+                        <div class="opp-detail"><span class="opp-label">Tactics:</span> @opp.Tactics</div>
+                    }
+                    <button class="btn-delete" @onclick="() => Delete(opp.Id)" @onclick:stopPropagation="true">🗑️</button>
+                </div>
+            }
+        </div>
+
+        @if (!opponents.Any())
+        {
+            <div class="empty-state">Know your opponents. Add notes on their game.</div>
+        }
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" @bind="current.Name" placeholder="Opponent name" />
+            </div>
+            <div class="form-group">
+                <label>Strengths</label>
+                <textarea @bind="current.Strengths" placeholder="What are they good at?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Weaknesses</label>
+                <textarea @bind="current.Weaknesses" placeholder="Where do they struggle?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Your Tactics Against Them</label>
+                <textarea @bind="current.Tactics" placeholder="How to beat them?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Extra Notes</label>
+                <textarea @bind="current.Notes" placeholder="Any other observations..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="Save">Save</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Opponent> opponents = new();
+    private Opponent current = new();
+    private bool showForm = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) { try { opponents = await Data.GetOpponentsAsync(); } catch { } StateHasChanged(); }
+    }
+
+    private void StartNew() { current = new(); showForm = true; }
+    private void Edit(Opponent opp) { current = opp; showForm = true; }
+
+    private async Task Save()
+    {
+        await Data.SaveOpponentAsync(current);
+        opponents = await Data.GetOpponentsAsync();
+        showForm = false;
+    }
+
+    private async Task Delete(Guid id)
+    {
+        await Data.DeleteOpponentAsync(id);
+        opponents = await Data.GetOpponentsAsync();
+    }
+}

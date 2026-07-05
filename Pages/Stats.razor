@@ -1,0 +1,111 @@
+@page "/stats"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="stats-page">
+    <h1>Progress & Analytics</h1>
+
+    @if (breaks.Any())
+    {
+        <div class="chart-card">
+            <h2>Break Progress</h2>
+            <p class="chart-subtitle">Last 20 breaks recorded</p>
+            <div class="bar-chart">
+                @foreach (var b in breaks.OrderBy(x => x.Date).TakeLast(20))
+                {
+                    var height = Math.Max(5, (double)b.Score / maxBreak * 100);
+                    <div class="bar-wrap">
+                        <div class="bar @(b.Score >= 100 ? "century" : b.Score >= 50 ? "fifty" : "")" 
+                             style="height: @height%"></div>
+                    </div>
+                }
+            </div>
+            <div class="chart-legend">
+                <span class="legend-item"><span class="dot accent"></span>Normal</span>
+                <span class="legend-item"><span class="dot fifty"></span>50+</span>
+                <span class="legend-item"><span class="dot century"></span>100+</span>
+            </div>
+        </div>
+    }
+
+    @if (sessions.Any())
+    {
+        <div class="chart-card">
+            <h2>Practice Consistency</h2>
+            <p class="chart-subtitle">Last 4 weeks</p>
+            <div class="heatmap">
+                @for (int week = 3; week >= 0; week--)
+                {
+                    <div class="heatmap-week">
+                        @for (int day = 0; day < 7; day++)
+                        {
+                            var date = DateTime.Today.AddDays(-(week * 7 + (6 - day)));
+                            var practiced = sessions.Any(s => s.Date.Date == date);
+                            <div class="heat-cell @(practiced ? "active" : "")" title="@date.ToString("MMM d")"></div>
+                        }
+                    </div>
+                }
+            </div>
+            <div class="heatmap-labels">
+                <span>4 weeks ago</span>
+                <span>Today</span>
+            </div>
+        </div>
+
+        <div class="chart-card">
+            <h2>Skill Ratings (Avg)</h2>
+            <div class="skill-bars">
+                <div class="skill-row">
+                    <span class="skill-name">Potting</span>
+                    <div class="skill-bar"><div class="skill-fill" style="width: @avgPotting%"></div></div>
+                    <span class="skill-val">@($"{avgPotting/10:F1}")</span>
+                </div>
+                <div class="skill-row">
+                    <span class="skill-name">Safety</span>
+                    <div class="skill-bar"><div class="skill-fill safety" style="width: @avgSafety%"></div></div>
+                    <span class="skill-val">@($"{avgSafety/10:F1}")</span>
+                </div>
+                <div class="skill-row">
+                    <span class="skill-name">Position</span>
+                    <div class="skill-bar"><div class="skill-fill position" style="width: @avgPosition%"></div></div>
+                    <span class="skill-val">@($"{avgPosition/10:F1}")</span>
+                </div>
+                <div class="skill-row">
+                    <span class="skill-name">Focus</span>
+                    <div class="skill-bar"><div class="skill-fill focus" style="width: @avgFocus%"></div></div>
+                    <span class="skill-val">@($"{avgFocus/10:F1}")</span>
+                </div>
+            </div>
+        </div>
+    }
+
+    @if (!sessions.Any() && !breaks.Any())
+    {
+        <div class="empty-state">Start logging sessions and breaks to see your progress here.</div>
+    }
+</div>
+
+@code {
+    private List<BreakRecord> breaks = new();
+    private List<PracticeSession> sessions = new();
+    private int maxBreak => breaks.Any() ? breaks.Max(b => b.Score) : 100;
+    private double avgPotting => sessions.Any() ? sessions.Average(s => s.PottingRating) * 10 : 0;
+    private double avgSafety => sessions.Any() ? sessions.Average(s => s.SafetyRating) * 10 : 0;
+    private double avgPosition => sessions.Any() ? sessions.Average(s => s.PositionalRating) * 10 : 0;
+    private double avgFocus => sessions.Any() ? sessions.Average(s => s.FocusRating) * 10 : 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                breaks = await Data.GetBreaksAsync();
+                sessions = await Data.GetSessionsAsync();
+            }
+            catch { }
+            StateHasChanged();
+        }
+    }
+}

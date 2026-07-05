@@ -1,0 +1,28 @@
+.shotclock-page { display: flex; flex-direction: column; gap: 1.25rem; align-items: center; }
+.shotclock-page h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); align-self: flex-start; }
+.page-subtitle { color: var(--text-muted); font-size: 0.8rem; align-self: flex-start; margin-top: -0.75rem; }
+.clock-display { display: flex; justify-content: center; padding: 1rem 0; }
+.clock-ring { position: relative; width: 180px; height: 180px; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.clock-ring svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+.clock-seconds { font-size: 3.5rem; font-weight: 800; color: var(--text-primary); z-index: 1; letter-spacing: -0.03em; }
+.clock-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; z-index: 1; }
+.clock-controls { display: flex; gap: 0.75rem; width: 100%; }
+.clock-btn { flex: 1; padding: 1rem; border: none; border-radius: var(--radius-sm); font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
+.clock-btn:active { transform: scale(0.95); }
+.clock-btn.start { background: var(--accent); color: var(--bg-primary); }
+.clock-btn.shot { background: var(--accent); color: var(--bg-primary); flex: 2; }
+.clock-btn.reset { background: var(--bg-card); color: var(--text-muted); border: 1px solid var(--border); }
+.shot-stats { width: 100%; background: var(--bg-card); border-radius: var(--radius-sm); padding: 1rem; border: 1px solid var(--border); }
+.stat-row { display: flex; justify-content: space-between; padding: 0.4rem 0; border-bottom: 1px solid var(--border); }
+.stat-row:last-child { border-bottom: none; }
+.stat-name { color: var(--text-muted); font-size: 0.8rem; font-weight: 500; }
+.stat-val { color: var(--text-primary); font-size: 0.85rem; font-weight: 700; }
+.shot-history { width: 100%; }
+.shot-history h3 { color: var(--text-primary); font-size: 0.9rem; margin-bottom: 0.5rem; }
+.shot-bars { display: flex; align-items: flex-end; gap: 3px; height: 80px; background: var(--bg-card); border-radius: var(--radius-xs); padding: 0.5rem; border: 1px solid var(--border); }
+.shot-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+.shot-bar { width: 100%; min-width: 8px; border-radius: 3px 3px 0 0; transition: height 0.3s; }
+.shot-bar.fast { background: var(--accent); }
+.shot-bar.medium { background: var(--warning); }
+.shot-bar.slow { background: var(--danger); }
+.shot-num { font-size: 0.5rem; color: var(--text-muted); margin-top: 2px; }

@@ -1,0 +1,105 @@
+@page "/tournament"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="tournament-page">
+    <h1>Tournament Prep</h1>
+
+    @if (!showForm)
+    {
+        <button class="btn-add" @onclick="() => { current = new(); showForm = true; }">+ Add Tournament</button>
+
+        @foreach (var t in tournaments.OrderBy(t => t.Date))
+        {
+            var daysUntil = (t.Date - DateTime.Now).Days;
+            <div class="tourney-card">
+                <div class="tourney-header">
+                    <div>
+                        <h2>@t.Name</h2>
+                        <span class="tourney-venue">📍 @t.Venue</span>
+                    </div>
+                    <div class="tourney-countdown @(daysUntil <= 3 ? "urgent" : "")">
+                        <span class="countdown-num">@(daysUntil > 0 ? daysUntil : 0)</span>
+                        <span class="countdown-label">days</span>
+                    </div>
+                </div>
+
+                <div class="tourney-date">@t.Date.ToString("dddd, MMMM d yyyy")</div>
+
+                <div class="checklist">
+                    <h3>Pre-Tournament Checklist</h3>
+                    @for (int i = 0; i < t.PrepChecklist.Count; i++)
+                    {
+                        var index = i;
+                        <div class="check-item @(t.ChecklistCompleted.Count > index && t.ChecklistCompleted[index] ? "done" : "")" 
+                             @onclick="() => ToggleCheck(t, index)">
+                            <span class="check-box">@(t.ChecklistCompleted.Count > index && t.ChecklistCompleted[index] ? "✓" : "")</span>
+                            <span class="check-text">@t.PrepChecklist[index]</span>
+                        </div>
+                    }
+                </div>
+
+                <button class="btn-del" @onclick="() => Delete(t.Id)">Delete Tournament</button>
+            </div>
+        }
+
+        @if (!tournaments.Any())
+        {
+            <div class="empty-state">Add your upcoming tournaments to prepare properly.</div>
+        }
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Tournament Name</label>
+                <input type="text" @bind="current.Name" placeholder="e.g., Club Championship" />
+            </div>
+            <div class="form-group">
+                <label>Venue</label>
+                <input type="text" @bind="current.Venue" placeholder="Location" />
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea @bind="current.Notes" placeholder="Format, opponents expected, etc."></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="Save">Save</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Tournament> tournaments = new();
+    private Tournament current = new();
+    private bool showForm = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) { try { tournaments = await Data.GetTournamentsAsync(); } catch { } StateHasChanged(); }
+    }
+
+    private async Task ToggleCheck(Tournament t, int index)
+    {
+        while (t.ChecklistCompleted.Count <= index) t.ChecklistCompleted.Add(false);
+        t.ChecklistCompleted[index] = !t.ChecklistCompleted[index];
+        await Data.SaveTournamentAsync(t);
+        StateHasChanged();
+    }
+
+    private async Task Save()
+    {
+        await Data.SaveTournamentAsync(current);
+        tournaments = await Data.GetTournamentsAsync();
+        showForm = false;
+    }
+
+    private async Task Delete(Guid id)
+    {
+        await Data.DeleteTournamentAsync(id);
+        tournaments = await Data.GetTournamentsAsync();
+    }
+}

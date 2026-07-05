@@ -1,0 +1,36 @@
+.stats-page { display: flex; flex-direction: column; gap: 1.25rem; }
+.stats-page h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
+.chart-card { background: var(--bg-card); border-radius: var(--radius-sm); padding: 1.25rem; border: 1px solid var(--border); }
+.chart-card h2 { color: var(--text-primary); font-size: 1rem; margin-bottom: 0.15rem; }
+.chart-subtitle { color: var(--text-muted); font-size: 0.72rem; margin-bottom: 1rem; }
+
+.bar-chart { display: flex; align-items: flex-end; gap: 3px; height: 120px; padding: 0.5rem 0; }
+.bar-wrap { flex: 1; height: 100%; display: flex; align-items: flex-end; }
+.bar { width: 100%; border-radius: 3px 3px 0 0; background: var(--accent); min-height: 4px; transition: height 0.3s; }
+.bar.fifty { background: var(--warning); }
+.bar.century { background: linear-gradient(180deg, #ffd700, #f59e0b); }
+
+.chart-legend { display: flex; gap: 1rem; margin-top: 0.75rem; }
+.legend-item { display: flex; align-items: center; gap: 0.3rem; font-size: 0.68rem; color: var(--text-muted); }
+.dot { width: 8px; height: 8px; border-radius: 2px; }
+.dot.accent { background: var(--accent); }
+.dot.fifty { background: var(--warning); }
+.dot.century { background: #ffd700; }
+
+.heatmap { display: flex; gap: 3px; }
+.heatmap-week { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.heat-cell { aspect-ratio: 1; border-radius: 3px; background: var(--bg-secondary); border: 1px solid var(--border); }
+.heat-cell.active { background: var(--accent); border-color: var(--accent); }
+.heatmap-labels { display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--text-muted); margin-top: 0.4rem; }
+
+.skill-bars { display: flex; flex-direction: column; gap: 0.75rem; }
+.skill-row { display: flex; align-items: center; gap: 0.6rem; }
+.skill-name { color: var(--text-secondary); font-size: 0.78rem; font-weight: 600; min-width: 60px; }
+.skill-bar { flex: 1; height: 8px; background: var(--bg-secondary); border-radius: 4px; overflow: hidden; }
+.skill-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.5s; }
+.skill-fill.safety { background: var(--info); }
+.skill-fill.position { background: #8b5cf6; }
+.skill-fill.focus { background: var(--warning); }
+.skill-val { color: var(--text-primary); font-size: 0.78rem; font-weight: 700; min-width: 25px; text-align: right; }
+
+.empty-state { text-align: center; color: var(--text-muted); padding: 3rem 1rem; font-size: 0.85rem; }

@@ -13,6 +13,8 @@ public class DataService
     private const string GoalsKey = "snooker_goals";
     private const string MatchesKey = "snooker_matches";
     private const string MentalLogsKey = "snooker_mental_logs";
+    private const string OpponentsKey = "snooker_opponents";
+    private const string TournamentsKey = "snooker_tournaments";
 
     public DataService(IJSRuntime js)
     {
@@ -141,6 +143,50 @@ public class DataService
         var logs = await GetMentalLogsAsync();
         logs.Add(log);
         await SetAsync(MentalLogsKey, logs);
+    }
+
+    // === Opponents ===
+    public async Task<List<Opponent>> GetOpponentsAsync()
+    {
+        return await GetAsync<List<Opponent>>(OpponentsKey) ?? new();
+    }
+
+    public async Task SaveOpponentAsync(Opponent opponent)
+    {
+        var list = await GetOpponentsAsync();
+        var existing = list.FindIndex(o => o.Id == opponent.Id);
+        if (existing >= 0) list[existing] = opponent;
+        else list.Add(opponent);
+        await SetAsync(OpponentsKey, list);
+    }
+
+    public async Task DeleteOpponentAsync(Guid id)
+    {
+        var list = await GetOpponentsAsync();
+        list.RemoveAll(o => o.Id == id);
+        await SetAsync(OpponentsKey, list);
+    }
+
+    // === Tournaments ===
+    public async Task<List<Tournament>> GetTournamentsAsync()
+    {
+        return await GetAsync<List<Tournament>>(TournamentsKey) ?? new();
+    }
+
+    public async Task SaveTournamentAsync(Tournament tournament)
+    {
+        var list = await GetTournamentsAsync();
+        var existing = list.FindIndex(t => t.Id == tournament.Id);
+        if (existing >= 0) list[existing] = tournament;
+        else list.Add(tournament);
+        await SetAsync(TournamentsKey, list);
+    }
+
+    public async Task DeleteTournamentAsync(Guid id)
+    {
+        var list = await GetTournamentsAsync();
+        list.RemoveAll(t => t.Id == id);
+        await SetAsync(TournamentsKey, list);
     }
 
     // === Statistics ===

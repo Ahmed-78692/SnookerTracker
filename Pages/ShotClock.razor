@@ -1,0 +1,114 @@
+@page "/shotclock"
+@implements IDisposable
+
+<div class="shotclock-page">
+    <h1>Shot Clock</h1>
+    <p class="page-subtitle">Pro average: 20-25 seconds per shot</p>
+
+    <div class="clock-display">
+        <div class="clock-ring @(seconds > 25 ? "warning" : seconds > 35 ? "danger" : "")">
+            <svg viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" fill="none" stroke="var(--border)" stroke-width="6"/>
+                <circle cx="60" cy="60" r="54" fill="none" stroke="@GetStrokeColor()" stroke-width="6"
+                        stroke-dasharray="@(Math.PI * 108)" stroke-dashoffset="@GetDashOffset()"
+                        stroke-linecap="round" transform="rotate(-90 60 60)"
+                        style="transition: stroke-dashoffset 1s linear;"/>
+            </svg>
+            <span class="clock-seconds">@seconds</span>
+            <span class="clock-label">SEC</span>
+        </div>
+    </div>
+
+    <div class="clock-controls">
+        @if (!isRunning)
+        {
+            <button class="clock-btn start" @onclick="Start">▶ Start</button>
+        }
+        else
+        {
+            <button class="clock-btn shot" @onclick="NextShot">🎱 Shot Taken</button>
+        }
+        <button class="clock-btn reset" @onclick="Reset">↺ Reset</button>
+    </div>
+
+    @if (shotTimes.Any())
+    {
+        <div class="shot-stats">
+            <div class="stat-row">
+                <span class="stat-name">Shots</span>
+                <span class="stat-val">@shotTimes.Count</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-name">Average</span>
+                <span class="stat-val">@($"{shotTimes.Average():F1}")s</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-name">Fastest</span>
+                <span class="stat-val">@shotTimes.Min()s</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-name">Slowest</span>
+                <span class="stat-val">@shotTimes.Max()s</span>
+            </div>
+        </div>
+
+        <div class="shot-history">
+            <h3>Shot Times</h3>
+            <div class="shot-bars">
+                @foreach (var (time, index) in shotTimes.TakeLast(20).Select((t, i) => (t, i)))
+                {
+                    <div class="shot-bar-wrap">
+                        <div class="shot-bar @(time > 30 ? "slow" : time > 25 ? "medium" : "fast")" 
+                             style="height: @(Math.Min(100, time * 2))%"></div>
+                        <span class="shot-num">@(index + 1)</span>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private int seconds = 0;
+    private bool isRunning = false;
+    private Timer? timer;
+    private List<int> shotTimes = new();
+
+    private void Start()
+    {
+        isRunning = true;
+        seconds = 0;
+        timer = new Timer(_ => { seconds++; InvokeAsync(StateHasChanged); }, null, 1000, 1000);
+    }
+
+    private void NextShot()
+    {
+        shotTimes.Add(seconds);
+        seconds = 0;
+    }
+
+    private void Reset()
+    {
+        isRunning = false;
+        seconds = 0;
+        shotTimes.Clear();
+        timer?.Dispose();
+        timer = null;
+    }
+
+    private string GetStrokeColor()
+    {
+        if (seconds > 35) return "var(--danger)";
+        if (seconds > 25) return "var(--warning)";
+        return "var(--accent)";
+    }
+
+    private string GetDashOffset()
+    {
+        var circumference = Math.PI * 108;
+        var progress = Math.Min(1.0, seconds / 45.0);
+        return $"{circumference * (1 - progress)}";
+    }
+
+    public void Dispose() { timer?.Dispose(); }
+}
