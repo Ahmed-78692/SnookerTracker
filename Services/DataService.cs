@@ -19,6 +19,9 @@ public class DataService
     private const string CustomDrillAttemptsKey = "snooker_custom_drill_attempts";
     private const string BreakCompositionsKey = "snooker_break_compositions";
     private const string DailyNotesKey = "snooker_daily_notes";
+    private const string ChallengesKey = "snooker_challenges";
+    private const string DailyChallengeKey = "snooker_daily_challenge";
+    private const string XPKey = "snooker_xp";
 
     public DataService(IJSRuntime js)
     {
@@ -259,6 +262,32 @@ public class DataService
         var list = await GetDailyNotesAsync();
         list.RemoveAll(n => n.Id == id);
         await SetAsync(DailyNotesKey, list);
+    }
+
+    // === Challenges ===
+    public async Task<List<Challenge>> GetChallengesAsync()
+    {
+        return await GetAsync<List<Challenge>>(ChallengesKey) ?? new();
+    }
+
+    public async Task SaveChallengeAsync(Challenge challenge)
+    {
+        var list = await GetChallengesAsync();
+        var existing = list.FindIndex(c => c.Id == challenge.Id);
+        if (existing >= 0) list[existing] = challenge;
+        else list.Add(challenge);
+        await SetAsync(ChallengesKey, list);
+    }
+
+    // === Daily Challenge ===
+    public async Task<DailyChallenge?> GetDailyChallengeAsync()
+    {
+        return await GetAsync<DailyChallenge>(DailyChallengeKey);
+    }
+
+    public async Task SaveDailyChallengeAsync(DailyChallenge challenge)
+    {
+        await SetAsync(DailyChallengeKey, challenge);
     }
 
     // === Statistics ===

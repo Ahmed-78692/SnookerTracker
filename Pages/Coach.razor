@@ -1,0 +1,69 @@
+@page "/coach"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject CoachService CoachSvc
+@inject DataService Data
+
+<div class="coach-page">
+    <h1>AI Coach</h1>
+    <p class="page-subtitle">Personalized analysis of your game</p>
+
+    <div class="coach-card">
+        <div class="coach-header">🧑‍🏫 Session Feedback</div>
+        <p class="coach-text">@sessionSummary</p>
+    </div>
+
+    <div class="coach-card accent">
+        <div class="coach-header">🔮 Century Prediction</div>
+        <p class="coach-text">@centuryPrediction</p>
+    </div>
+
+    <div class="coach-card">
+        <div class="coach-header">⚡ Fatigue Analysis</div>
+        <p class="coach-text">@fatigueInsight</p>
+        <div class="optimal-badge">Optimal session: <strong>@optimalMinutes min</strong></div>
+    </div>
+
+    <div class="coach-card">
+        <div class="coach-header">🕐 Best Time of Day</div>
+        <p class="coach-text">@timeInsight</p>
+        <div class="time-badge">Peak performance: <strong>@bestTime</strong></div>
+    </div>
+
+    <div class="coach-card xp">
+        <div class="coach-header">⭐ Your Level</div>
+        <div class="xp-display">
+            <span class="level-name">@profile.Level</span>
+            <span class="xp-amount">@profile.XP XP</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" style="width: @profile.LevelProgress%"></div></div>
+        <span class="xp-next">Next level at @profile.XPToNextLevel XP</span>
+    </div>
+</div>
+
+@code {
+    private string sessionSummary = "Loading...";
+    private string centuryPrediction = "Loading...";
+    private string fatigueInsight = "Loading...";
+    private string timeInsight = "Loading...";
+    private int optimalMinutes = 90;
+    private string bestTime = "Unknown";
+    private PlayerProfile profile = new();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                sessionSummary = await CoachSvc.GetSessionSummaryAsync();
+                centuryPrediction = await CoachSvc.PredictNextCenturyAsync();
+                (optimalMinutes, fatigueInsight) = await CoachSvc.GetFatigueAnalysisAsync();
+                (bestTime, timeInsight) = await CoachSvc.GetBestTimeAnalysisAsync();
+                profile.XP = await CoachSvc.CalculateXPAsync();
+            }
+            catch { sessionSummary = "Start logging sessions for coaching insights."; }
+            StateHasChanged();
+        }
+    }
+}

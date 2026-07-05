@@ -1,0 +1,27 @@
+.challenges-page { display: flex; flex-direction: column; gap: 1.25rem; }
+.challenges-page h1 { font-size: 1.4rem; font-weight: 800; color: var(--text-primary); }
+.challenges-page h2 { font-size: 1rem; font-weight: 700; color: var(--text-primary); margin-bottom: 0.4rem; }
+.daily-card { background: var(--bg-card); border-radius: var(--radius-sm); padding: 1.1rem; border: 1px solid var(--border); }
+.daily-card.done { border-color: var(--accent); background: linear-gradient(135deg, var(--bg-card), rgba(0,212,170,0.05)); }
+.daily-drill { color: var(--text-primary); font-weight: 700; font-size: 1.1rem; }
+.daily-target { color: var(--accent); font-size: 0.85rem; font-weight: 600; margin: 0.3rem 0 0.75rem; }
+.daily-input { display: flex; gap: 0.5rem; }
+.daily-input input { flex: 1; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-xs); padding: 0.7rem; color: var(--text-primary); font-size: 0.9rem; }
+.btn-complete { padding: 0.7rem 1.25rem; background: var(--accent); color: var(--bg-primary); border: none; border-radius: var(--radius-xs); font-weight: 700; cursor: pointer; }
+.daily-done { color: var(--accent); font-weight: 700; font-size: 0.9rem; }
+.btn-add-sm { padding: 0.7rem; background: var(--bg-card); border: 1px dashed var(--border); border-radius: var(--radius-xs); color: var(--accent); font-weight: 600; font-size: 0.85rem; width: 100%; cursor: pointer; }
+.form-mini { display: flex; flex-direction: column; gap: 0.5rem; }
+.form-mini input { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-xs); padding: 0.7rem; color: var(--text-primary); font-size: 0.9rem; }
+.form-row-mini { display: flex; gap: 0.5rem; }
+.btn-save-sm { padding: 0.7rem 1rem; background: var(--accent); color: var(--bg-primary); border: none; border-radius: var(--radius-xs); font-weight: 700; cursor: pointer; }
+.challenge-card { background: var(--bg-card); border-radius: var(--radius-xs); padding: 0.85rem; border: 1px solid var(--border); margin-top: 0.4rem; }
+.ch-title { color: var(--text-primary); font-weight: 600; font-size: 0.88rem; }
+.ch-meta { color: var(--text-muted); font-size: 0.72rem; margin: 0.2rem 0 0.5rem; }
+.btn-done-sm { padding: 0.4rem 0.75rem; background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(0,212,170,0.3); border-radius: var(--radius-xs); font-size: 0.75rem; font-weight: 700; cursor: pointer; }
+.rivals-section { }
+.rivals-intro { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem; }
+.rival-card { background: var(--bg-card); border-radius: var(--radius-xs); padding: 0.9rem; border: 1px solid var(--border); margin-bottom: 0.5rem; }
+.rival-name { color: var(--text-primary); font-weight: 700; font-size: 0.95rem; }
+.rival-stats { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.3rem 0; }
+.rival-stats span { background: var(--bg-secondary); padding: 0.2rem 0.4rem; border-radius: 4px; font-size: 0.68rem; color: var(--text-muted); }
+.rival-note { color: var(--text-secondary); font-size: 0.75rem; line-height: 1.4; font-style: italic; }

@@ -1,0 +1,121 @@
+@page "/challenges"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject CoachService CoachSvc
+@inject DataService Data
+
+<div class="challenges-page">
+    <h1>Challenges</h1>
+
+    <div class="daily-section">
+        <h2>🎯 Today's Challenge</h2>
+        <div class="daily-card @(dailyChallenge.Completed ? "done" : "")">
+            <div class="daily-drill">@dailyChallenge.DrillName</div>
+            <div class="daily-target">Score @dailyChallenge.TargetScore or more</div>
+            @if (!dailyChallenge.Completed)
+            {
+                <div class="daily-input">
+                    <input type="number" @bind="dailyScore" min="0" placeholder="Your score" />
+                    <button class="btn-complete" @onclick="CompleteDailyChallenge">✓ Done</button>
+                </div>
+            }
+            else
+            {
+                <div class="daily-done">✅ Completed! Score: @dailyChallenge.ActualScore</div>
+            }
+        </div>
+    </div>
+
+    <div class="custom-section">
+        <h2>⚔️ Active Challenges</h2>
+        @if (!showNewChallenge)
+        {
+            <button class="btn-add-sm" @onclick="() => showNewChallenge = true">+ New Challenge</button>
+        }
+        else
+        {
+            <div class="form-mini">
+                <input type="text" @bind="newChallenge.Title" placeholder="e.g., Score 8/10 on Long Blue" />
+                <div class="form-row-mini">
+                    <input type="number" @bind="newChallenge.TargetScore" placeholder="Target" min="1" />
+                    <button class="btn-save-sm" @onclick="SaveChallenge">Add</button>
+                </div>
+            </div>
+        }
+
+        @foreach (var c in challenges.Where(x => !x.Completed).OrderBy(x => x.Deadline))
+        {
+            var daysLeft = (c.Deadline - DateTime.Now).Days;
+            <div class="challenge-card">
+                <div class="ch-title">@c.Title</div>
+                <div class="ch-meta">Target: @c.TargetScore · @daysLeft days left</div>
+                <button class="btn-done-sm" @onclick="() => CompleteChallenge(c)">Mark Done</button>
+            </div>
+        }
+    </div>
+
+    <div class="rivals-section">
+        <h2>🏆 Pro Rival Comparison</h2>
+        <p class="rivals-intro">How do you compare to the pros at their early stage?</p>
+        @foreach (var rival in CoachSvc.GetProRivals())
+        {
+            <div class="rival-card">
+                <div class="rival-name">@rival.ProName</div>
+                <div class="rival-stats">
+                    <span>Started: age @rival.ProAgeWhenStarted</span>
+                    <span>Hours: ~@rival.ProHoursAtYourStage</span>
+                    <span>Break: @rival.ProHighestBreakAtYourStage</span>
+                </div>
+                <div class="rival-note">@rival.ProNote</div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private DailyChallenge dailyChallenge = new();
+    private List<Challenge> challenges = new();
+    private Challenge newChallenge = new();
+    private bool showNewChallenge = false;
+    private int dailyScore = 0;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var saved = await Data.GetDailyChallengeAsync();
+                if (saved != null && saved.Date == DateTime.Today)
+                    dailyChallenge = saved;
+                else
+                    dailyChallenge = CoachSvc.GetDailyChallenge();
+                challenges = await Data.GetChallengesAsync();
+            }
+            catch { dailyChallenge = CoachSvc.GetDailyChallenge(); }
+            StateHasChanged();
+        }
+    }
+
+    private async Task CompleteDailyChallenge()
+    {
+        dailyChallenge.Completed = true;
+        dailyChallenge.ActualScore = dailyScore;
+        await Data.SaveDailyChallengeAsync(dailyChallenge);
+    }
+
+    private async Task SaveChallenge()
+    {
+        await Data.SaveChallengeAsync(newChallenge);
+        challenges = await Data.GetChallengesAsync();
+        newChallenge = new();
+        showNewChallenge = false;
+    }
+
+    private async Task CompleteChallenge(Challenge c)
+    {
+        c.Completed = true;
+        await Data.SaveChallengeAsync(c);
+        challenges = await Data.GetChallengesAsync();
+    }
+}
