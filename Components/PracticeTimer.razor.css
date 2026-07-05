@@ -1,0 +1,49 @@
+.timer-container {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid #0f3460;
+    margin-bottom: 1rem;
+}
+
+.timer-display {
+    margin-bottom: 1rem;
+}
+
+.timer-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #4ecca3;
+    font-family: 'Courier New', monospace;
+}
+
+.timer-controls {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.timer-btn {
+    padding: 0.6rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.timer-btn.start {
+    background: #4ecca3;
+    color: #1a1a2e;
+}
+
+.timer-btn.stop {
+    background: #e94560;
+    color: white;
+}
+
+.timer-btn.reset {
+    background: #0f3460;
+    color: #a0a0a0;
+}

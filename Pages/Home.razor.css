@@ -1,0 +1,137 @@
+.dashboard {
+    padding-bottom: 1rem;
+}
+
+.dash-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.dash-header h1 {
+    color: #4ecca3;
+    margin: 0;
+    font-size: 1.6rem;
+}
+
+.subtitle {
+    color: #a0a0a0;
+    margin: 0.25rem 0 0;
+    font-size: 0.9rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-card {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid #0f3460;
+}
+
+.stat-card.highlight {
+    border-color: #4ecca3;
+    grid-column: span 2;
+}
+
+.stat-card.highlight .stat-value {
+    font-size: 2.5rem;
+    color: #4ecca3;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #a0a0a0;
+    margin-top: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.section {
+    margin-bottom: 1.5rem;
+}
+
+.section h2 {
+    color: #ffffff;
+    font-size: 1.1rem;
+    margin-bottom: 0.75rem;
+}
+
+.mini-stats {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mini-stat {
+    flex: 1;
+    background: #16213e;
+    border-radius: 10px;
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid #0f3460;
+}
+
+.mini-value {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #e94560;
+}
+
+.mini-label {
+    display: block;
+    font-size: 0.7rem;
+    color: #a0a0a0;
+    text-transform: uppercase;
+}
+
+.quick-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.action-btn {
+    flex: 1;
+    padding: 0.9rem;
+    border-radius: 10px;
+    text-align: center;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: transform 0.1s;
+}
+
+.action-btn:active {
+    transform: scale(0.95);
+}
+
+.action-btn.primary {
+    background: #4ecca3;
+    color: #1a1a2e;
+}
+
+.action-btn.secondary {
+    background: #0f3460;
+    color: #4ecca3;
+    border: 1px solid #4ecca3;
+}
+
+.loading {
+    text-align: center;
+    color: #a0a0a0;
+    padding: 3rem 1rem;
+}

@@ -1,0 +1,136 @@
+@page "/goals"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="goals-page">
+    <h1>🏆 Goals</h1>
+
+    @if (!showForm)
+    {
+        <button class="btn-add" @onclick="() => showForm = true">+ Set New Goal</button>
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Goal Title</label>
+                <input type="text" @bind="newGoal.Title" placeholder="e.g., Make a century break" />
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea @bind="newGoal.Description" placeholder="What does this goal mean to you?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Goal Type</label>
+                <select @bind="newGoal.Type">
+                    @foreach (var type in Enum.GetValues<GoalType>())
+                    {
+                        <option value="@type">@FormatGoalType(type)</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Target Value</label>
+                <input type="number" @bind="newGoal.TargetValue" min="1" />
+            </div>
+            <div class="form-group">
+                <label>Current Progress</label>
+                <input type="number" @bind="newGoal.CurrentValue" min="0" />
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="SaveGoal">Save Goal</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+
+    <div class="goals-list">
+        @if (goals.Any())
+        {
+            @foreach (var goal in goals.OrderBy(g => g.IsCompleted).ThenByDescending(g => g.CreatedDate))
+            {
+                <div class="goal-card @(goal.IsCompleted ? "completed" : "")">
+                    <div class="goal-header">
+                        <span class="goal-title">@goal.Title</span>
+                        <span class="goal-badge @(goal.IsCompleted ? "done" : "")">
+                            @(goal.IsCompleted ? "✓ Done" : FormatGoalType(goal.Type))
+                        </span>
+                    </div>
+                    @if (!string.IsNullOrEmpty(goal.Description))
+                    {
+                        <p class="goal-desc">@goal.Description</p>
+                    }
+                    <div class="goal-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: @goal.ProgressPercentage%"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span>@goal.CurrentValue / @goal.TargetValue</span>
+                            <span>@((int)goal.ProgressPercentage)%</span>
+                        </div>
+                    </div>
+                    @if (!goal.IsCompleted)
+                    {
+                        <div class="goal-actions">
+                            <button class="btn-update" @onclick="() => UpdateProgress(goal)">+ Update</button>
+                            <button class="btn-goal-delete" @onclick="() => DeleteGoal(goal.Id)">Delete</button>
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div class="empty-state">
+                <p>No goals set yet. Dream big!</p>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Goal> goals = new();
+    private Goal newGoal = new() { TargetValue = 100 };
+    private bool showForm = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            goals = await Data.GetGoalsAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveGoal()
+    {
+        await Data.SaveGoalAsync(newGoal);
+        goals = await Data.GetGoalsAsync();
+        newGoal = new() { TargetValue = 100 };
+        showForm = false;
+    }
+
+    private async Task UpdateProgress(Goal goal)
+    {
+        goal.CurrentValue++;
+        await Data.SaveGoalAsync(goal);
+        goals = await Data.GetGoalsAsync();
+    }
+
+    private async Task DeleteGoal(Guid id)
+    {
+        await Data.DeleteGoalAsync(id);
+        goals = await Data.GetGoalsAsync();
+    }
+
+    private string FormatGoalType(GoalType type) => type switch
+    {
+        GoalType.HighestBreak => "Highest Break",
+        GoalType.CenturyCount => "Century Count",
+        GoalType.PracticeHours => "Practice Hours",
+        GoalType.ConsecutiveDays => "Consecutive Days",
+        GoalType.DrillScore => "Drill Score",
+        _ => type.ToString()
+    };
+}

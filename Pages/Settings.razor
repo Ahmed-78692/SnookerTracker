@@ -1,0 +1,127 @@
+@page "/settings"
+@using SnookerTracker.Services
+@inject DataService Data
+@inject IJSRuntime JS
+
+<div class="settings-page">
+    <h1>⚙️ Settings</h1>
+
+    <div class="section">
+        <h2>Export / Backup</h2>
+        <p class="section-desc">Download all your data as a JSON file. Keep it safe!</p>
+        <button class="btn-export" @onclick="ExportData">📥 Export All Data</button>
+    </div>
+
+    <div class="section">
+        <h2>Weekly Summary</h2>
+        @if (weeklySummary != null)
+        {
+            <div class="weekly-card">
+                <h3>This Week (@DateTime.Now.AddDays(-7).ToString("MMM d") - @DateTime.Now.ToString("MMM d"))</h3>
+                <div class="weekly-stats">
+                    <div class="weekly-stat">
+                        <span class="ws-value">@weeklySummary.Sessions</span>
+                        <span class="ws-label">Sessions</span>
+                    </div>
+                    <div class="weekly-stat">
+                        <span class="ws-value">@weeklySummary.TotalMinutes min</span>
+                        <span class="ws-label">Practice</span>
+                    </div>
+                    <div class="weekly-stat">
+                        <span class="ws-value">@weeklySummary.HighestBreak</span>
+                        <span class="ws-label">Best Break</span>
+                    </div>
+                    <div class="weekly-stat">
+                        <span class="ws-value">@weeklySummary.DrillsCompleted</span>
+                        <span class="ws-label">Drills</span>
+                    </div>
+                </div>
+                @if (weeklySummary.Sessions > 0)
+                {
+                    <p class="weekly-note">
+                        @GetMotivation()
+                    </p>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="section">
+        <h2>Warm-Up Routine</h2>
+        <div class="warmup-card">
+            <h3>Recommended Pre-Practice Routine</h3>
+            <ol class="warmup-list">
+                <li><strong>Loose pots (5 min)</strong> — Easy reds into any pocket. Get your arm loose.</li>
+                <li><strong>Line-up drill (5 min)</strong> — 15 reds straight. Build rhythm.</li>
+                <li><strong>Long pots (5 min)</strong> — Blue from baulk. Find your sighting.</li>
+                <li><strong>Stun/screw practice (5 min)</strong> — Cue ball control warm-up.</li>
+                <li><strong>One frame against yourself (10 min)</strong> — Get into match mode.</li>
+            </ol>
+            <p class="warmup-note">Total: ~30 minutes. Never skip the warm-up — cold cueing leads to bad habits.</p>
+        </div>
+    </div>
+
+    <div class="section app-info">
+        <p>Snooker Tracker v1.0</p>
+        <p>Built for champions. Keep grinding. 🎱</p>
+    </div>
+</div>
+
+@code {
+    private WeeklySummary? weeklySummary;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadWeeklySummary();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadWeeklySummary()
+    {
+        var sessions = await Data.GetSessionsAsync();
+        var breaks = await Data.GetBreaksAsync();
+        var drills = await Data.GetDrillAttemptsAsync();
+        var weekAgo = DateTime.Now.AddDays(-7);
+
+        weeklySummary = new WeeklySummary
+        {
+            Sessions = sessions.Count(s => s.Date >= weekAgo),
+            TotalMinutes = sessions.Where(s => s.Date >= weekAgo).Sum(s => s.DurationMinutes),
+            HighestBreak = breaks.Where(b => b.Date >= weekAgo).Any() ? breaks.Where(b => b.Date >= weekAgo).Max(b => b.Score) : 0,
+            DrillsCompleted = drills.Count(d => d.Date >= weekAgo)
+        };
+    }
+
+    private async Task ExportData()
+    {
+        var sessions = await Data.GetSessionsAsync();
+        var breaks = await Data.GetBreaksAsync();
+        var drills = await Data.GetDrillAttemptsAsync();
+        var goals = await Data.GetGoalsAsync();
+        var matches = await Data.GetMatchesAsync();
+
+        var export = new { sessions, breaks, drills, goals, matches, exportDate = DateTime.Now };
+        var json = System.Text.Json.JsonSerializer.Serialize(export, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+
+        await JS.InvokeVoidAsync("downloadFile", $"snooker-backup-{DateTime.Now:yyyy-MM-dd}.json", json);
+    }
+
+    private string GetMotivation()
+    {
+        if (weeklySummary!.Sessions >= 6) return "Outstanding dedication! 6+ sessions this week. You're on the path to greatness.";
+        if (weeklySummary.Sessions >= 4) return "Solid week! Consistent practice is the key to reaching international level.";
+        if (weeklySummary.Sessions >= 2) return "Good start. Try to add more sessions — pros practice 4-6 hours daily.";
+        return "Let's pick up the pace. Champions are made at the table, not away from it.";
+    }
+
+    private class WeeklySummary
+    {
+        public int Sessions { get; set; }
+        public int TotalMinutes { get; set; }
+        public int HighestBreak { get; set; }
+        public int DrillsCompleted { get; set; }
+    }
+}

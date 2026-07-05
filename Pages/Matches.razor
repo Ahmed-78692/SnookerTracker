@@ -1,0 +1,123 @@
+@page "/matches"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="matches-page">
+    <h1>⚔️ Matches</h1>
+
+    @if (!showForm)
+    {
+        <button class="btn-add" @onclick="() => showForm = true">+ Log Match</button>
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Opponent</label>
+                <input type="text" @bind="newMatch.OpponentName" placeholder="Opponent name" />
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Frames Won</label>
+                    <input type="number" @bind="newMatch.FramesWon" min="0" />
+                </div>
+                <div class="form-group">
+                    <label>Frames Lost</label>
+                    <input type="number" @bind="newMatch.FramesLost" min="0" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Highest Break</label>
+                <input type="number" @bind="newMatch.HighestBreak" min="0" max="147" />
+            </div>
+            <div class="form-group">
+                <label>Match Type</label>
+                <select @bind="newMatch.Type">
+                    @foreach (var type in Enum.GetValues<MatchType>())
+                    {
+                        <option value="@type">@type</option>
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea @bind="newMatch.Notes" placeholder="Key moments, what you learned..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="SaveMatch">Save</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (matches.Any())
+    {
+        <div class="match-summary">
+            <div class="summary-card">
+                <span class="summary-value">@matches.Count</span>
+                <span class="summary-label">Played</span>
+            </div>
+            <div class="summary-card win">
+                <span class="summary-value">@matches.Count(m => m.IsWin)</span>
+                <span class="summary-label">Won</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-value">@(matches.Any() ? $"{(int)((double)matches.Count(m => m.IsWin) / matches.Count * 100)}%" : "0%")</span>
+                <span class="summary-label">Win Rate</span>
+            </div>
+        </div>
+
+        <div class="matches-list">
+            @foreach (var match in matches.OrderByDescending(m => m.Date))
+            {
+                <div class="match-card @(match.IsWin ? "win" : "loss")">
+                    <div class="match-result">
+                        <span class="result-badge @(match.IsWin ? "win" : "loss")">@(match.IsWin ? "W" : "L")</span>
+                    </div>
+                    <div class="match-info">
+                        <span class="match-opponent">vs @match.OpponentName</span>
+                        <span class="match-score">@match.FramesWon - @match.FramesLost</span>
+                        <span class="match-meta">@match.Date.ToString("MMM d") · @match.Type · HB: @match.HighestBreak</span>
+                    </div>
+                    <button class="btn-delete" @onclick="() => DeleteMatch(match.Id)">🗑️</button>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>No matches recorded yet. Log your competitive games!</p>
+        </div>
+    }
+</div>
+
+@code {
+    private List<MatchRecord> matches = new();
+    private MatchRecord newMatch = new();
+    private bool showForm = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            matches = await Data.GetMatchesAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveMatch()
+    {
+        await Data.SaveMatchAsync(newMatch);
+        matches = await Data.GetMatchesAsync();
+        newMatch = new();
+        showForm = false;
+    }
+
+    private async Task DeleteMatch(Guid id)
+    {
+        await Data.DeleteMatchAsync(id);
+        matches = await Data.GetMatchesAsync();
+    }
+}

@@ -1,0 +1,139 @@
+@page "/breaks"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@using SnookerTracker.Components
+@inject DataService Data
+
+<div class="breaks-page">
+    <h1>💯 Break Records</h1>
+
+    @if (showCelebration)
+    {
+        <div class="celebration" @onclick="() => showCelebration = false">
+            <p>@celebrationMessage</p>
+            <span class="tap-dismiss">Tap to dismiss</span>
+        </div>
+    }
+
+    @if (!showForm)
+    {
+        <BreakBuilder OnBreakComplete="OnBreakFromBuilder" />
+
+        <button class="btn-add" @onclick="() => showForm = true">+ Manual Entry</button>
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Break Score</label>
+                <input type="number" @bind="newBreak.Score" min="1" max="147" />
+            </div>
+            <div class="form-group">
+                <label>Notes (optional)</label>
+                <textarea @bind="newBreak.Notes" placeholder="Details about this break..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="btn-save" @onclick="SaveBreak">Save Break</button>
+                <button class="btn-cancel" @onclick="() => showForm = false">Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (breaks.Any())
+    {
+        <div class="break-summary">
+            <div class="summary-card">
+                <span class="summary-value">@breaks.Max(b => b.Score)</span>
+                <span class="summary-label">Highest</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-value">@((int)breaks.Average(b => b.Score))</span>
+                <span class="summary-label">Average</span>
+            </div>
+            <div class="summary-card">
+                <span class="summary-value">@breaks.Count(b => b.IsCentury)</span>
+                <span class="summary-label">Centuries</span>
+            </div>
+        </div>
+
+        <div class="breaks-list">
+            @foreach (var b in breaks.OrderByDescending(b => b.Score))
+            {
+                <div class="break-card @(b.IsMaximum ? "maximum" : b.IsCentury ? "century" : "")">
+                    <span class="break-score">@b.Score</span>
+                    <div class="break-info">
+                        <span class="break-date">@b.Date.ToString("ddd, MMM d yyyy")</span>
+                        @if (b.IsMaximum)
+                        {
+                            <span class="break-badge badge-max">MAXIMUM!</span>
+                        }
+                        else if (b.IsCentury)
+                        {
+                            <span class="break-badge badge-century">CENTURY</span>
+                        }
+                        @if (!string.IsNullOrEmpty(b.Notes))
+                        {
+                            <div class="break-notes">@b.Notes</div>
+                        }
+                    </div>
+                    <button class="btn-delete" @onclick="() => DeleteBreak(b.Id)">🗑️</button>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <p>No breaks recorded yet. Go make some history!</p>
+        </div>
+    }
+</div>
+
+@code {
+    private List<BreakRecord> breaks = new();
+    private BreakRecord newBreak = new() { Score = 50 };
+    private bool showForm = false;
+    private bool showCelebration = false;
+    private string celebrationMessage = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            breaks = await Data.GetBreaksAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveBreak()
+    {
+        var previousBest = breaks.Any() ? breaks.Max(b => b.Score) : 0;
+        await Data.SaveBreakAsync(newBreak);
+        breaks = await Data.GetBreaksAsync();
+        
+        if (newBreak.Score > previousBest && previousBest > 0)
+        {
+            showCelebration = true;
+            celebrationMessage = newBreak.Score >= 100 
+                ? $"🎉 CENTURY! New personal best: {newBreak.Score}! 🏆" 
+                : $"🎉 NEW PERSONAL BEST: {newBreak.Score}! Keep pushing! 💪";
+        }
+        
+        newBreak = new() { Score = 50 };
+        showForm = false;
+    }
+
+    private async Task DeleteBreak(Guid id)
+    {
+        await Data.DeleteBreakAsync(id);
+        breaks = await Data.GetBreaksAsync();
+    }
+
+    private async Task OnBreakFromBuilder(int score)
+    {
+        var breakRecord = new BreakRecord { Score = score, Notes = "Recorded via Break Builder" };
+        await Data.SaveBreakAsync(breakRecord);
+        breaks = await Data.GetBreaksAsync();
+        StateHasChanged();
+    }
+}

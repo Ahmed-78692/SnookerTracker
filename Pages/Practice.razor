@@ -1,0 +1,141 @@
+@page "/practice"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@using SnookerTracker.Components
+@inject DataService Data
+
+<div class="practice-page">
+    <h1>🎱 Log Practice</h1>
+
+    @if (!showForm)
+    {
+        <PracticeTimer OnTimerStop="OnTimerStop" />
+
+        <button class="btn-add" @onclick="() => showForm = true">+ New Session</button>
+
+        <div class="sessions-list">
+            @if (sessions.Any())
+            {
+                @foreach (var session in sessions.OrderByDescending(s => s.Date))
+                {
+                    <div class="session-card">
+                        <div class="session-header">
+                            <span class="session-date">@session.Date.ToString("ddd, MMM d")</span>
+                            <span class="session-duration">@session.DurationMinutes min</span>
+                        </div>
+                        <div class="session-break">
+                            Highest Break: <strong>@session.HighestBreak</strong>
+                        </div>
+                        <div class="session-ratings">
+                            <span title="Potting">🎯 @session.PottingRating</span>
+                            <span title="Safety">🛡️ @session.SafetyRating</span>
+                            <span title="Position">📐 @session.PositionalRating</span>
+                            <span title="Focus">🧠 @session.FocusRating</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(session.Notes))
+                        {
+                            <div class="session-notes">@session.Notes</div>
+                        }
+                        <button class="btn-delete" @onclick="() => DeleteSession(session.Id)">🗑️</button>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="empty-state">
+                    <p>No sessions yet. Start logging your practice!</p>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="form">
+            <div class="form-group">
+                <label>Duration (minutes)</label>
+                <input type="number" @bind="newSession.DurationMinutes" min="1" max="600" />
+            </div>
+
+            <div class="form-group">
+                <label>Highest Break</label>
+                <input type="number" @bind="newSession.HighestBreak" min="0" max="147" />
+            </div>
+
+            <div class="form-group">
+                <label>Potting (1-10)</label>
+                <input type="range" @bind="newSession.PottingRating" min="1" max="10" />
+                <span class="range-value">@newSession.PottingRating</span>
+            </div>
+
+            <div class="form-group">
+                <label>Safety (1-10)</label>
+                <input type="range" @bind="newSession.SafetyRating" min="1" max="10" />
+                <span class="range-value">@newSession.SafetyRating</span>
+            </div>
+
+            <div class="form-group">
+                <label>Positional Play (1-10)</label>
+                <input type="range" @bind="newSession.PositionalRating" min="1" max="10" />
+                <span class="range-value">@newSession.PositionalRating</span>
+            </div>
+
+            <div class="form-group">
+                <label>Focus/Mental (1-10)</label>
+                <input type="range" @bind="newSession.FocusRating" min="1" max="10" />
+                <span class="range-value">@newSession.FocusRating</span>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea @bind="newSession.Notes" placeholder="What went well? What to improve?"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn-save" @onclick="SaveSession">Save Session</button>
+                <button class="btn-cancel" @onclick="Cancel">Cancel</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<PracticeSession> sessions = new();
+    private PracticeSession newSession = new() { DurationMinutes = 60, PottingRating = 5, SafetyRating = 5, PositionalRating = 5, FocusRating = 5 };
+    private bool showForm = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            sessions = await Data.GetSessionsAsync();
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveSession()
+    {
+        await Data.SaveSessionAsync(newSession);
+        sessions = await Data.GetSessionsAsync();
+        newSession = new() { DurationMinutes = 60, PottingRating = 5, SafetyRating = 5, PositionalRating = 5, FocusRating = 5 };
+        showForm = false;
+    }
+
+    private async Task DeleteSession(Guid id)
+    {
+        await Data.DeleteSessionAsync(id);
+        sessions = await Data.GetSessionsAsync();
+    }
+
+    private void Cancel()
+    {
+        newSession = new() { DurationMinutes = 60, PottingRating = 5, SafetyRating = 5, PositionalRating = 5, FocusRating = 5 };
+        showForm = false;
+    }
+
+    private void OnTimerStop(int minutes)
+    {
+        newSession.DurationMinutes = minutes;
+        showForm = true;
+        StateHasChanged();
+    }
+}

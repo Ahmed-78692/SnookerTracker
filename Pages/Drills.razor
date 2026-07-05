@@ -1,0 +1,162 @@
+@page "/drills"
+@using SnookerTracker.Models
+@using SnookerTracker.Services
+@using SnookerTracker.Components
+@inject DataService Data
+
+<div class="drills-page">
+    <h1>🎯 Drill Library</h1>
+
+    @if (selectedDrill == null)
+    {
+        <div class="category-filter">
+            <button class="filter-btn @(selectedCategory == null ? "active" : "")" @onclick="() => selectedCategory = null">All</button>
+            @foreach (var cat in Enum.GetValues<DrillCategory>())
+            {
+                <button class="filter-btn @(selectedCategory == cat ? "active" : "")" @onclick="() => selectedCategory = cat">@cat</button>
+            }
+        </div>
+
+        <div class="drills-list">
+            @foreach (var drill in FilteredDrills)
+            {
+                <div class="drill-card" @onclick="() => SelectDrill(drill)">
+                    <div class="drill-header">
+                        <span class="drill-name">@drill.Name</span>
+                        <span class="drill-difficulty @drill.Difficulty.ToString().ToLower()">@drill.Difficulty</span>
+                    </div>
+                    <p class="drill-desc">@drill.Description</p>
+                    <div class="drill-meta">
+                        <span class="drill-category">@drill.Category</span>
+                        <span class="drill-target">Target: @drill.TargetScore/@drill.MaxScore</span>
+                    </div>
+                    @if (drillBestScores.ContainsKey(drill.Id))
+                    {
+                        <div class="drill-best">Your Best: <strong>@drillBestScores[drill.Id]</strong></div>
+                    }
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="drill-detail">
+            <button class="btn-back" @onclick="() => { selectedDrill = null; showAttemptForm = false; }">← Back</button>
+
+            <div class="drill-info">
+                <h2>@selectedDrill.Name</h2>
+                <span class="drill-difficulty @selectedDrill.Difficulty.ToString().ToLower()">@selectedDrill.Difficulty</span>
+                <span class="drill-category">@selectedDrill.Category</span>
+            </div>
+
+            <div class="instructions-card">
+                <h3>Instructions</h3>
+                <p>@selectedDrill.Instructions</p>
+                <div class="score-info">
+                    <span>Target Score: <strong>@selectedDrill.TargetScore</strong></span>
+                    <span>Max Score: <strong>@selectedDrill.MaxScore</strong></span>
+                </div>
+            </div>
+
+            @if (selectedDrill.TableSetup != null)
+            {
+                <div class="table-diagram">
+                    <h3>Table Setup</h3>
+                    <SnookerTable Balls="@selectedDrill.TableSetup.Balls" 
+                                  Arrows="@selectedDrill.TableSetup.Arrows" 
+                                  Zones="@selectedDrill.TableSetup.Zones" />
+                </div>
+            }
+
+            @if (!showAttemptForm)
+            {
+                <button class="btn-attempt" @onclick="() => showAttemptForm = true">+ Log Attempt</button>
+            }
+            else
+            {
+                <div class="form">
+                    <div class="form-group">
+                        <label>Score (max @selectedDrill.MaxScore)</label>
+                        <input type="number" @bind="newAttempt.Score" min="0" max="@selectedDrill.MaxScore" />
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea @bind="newAttempt.Notes" placeholder="How did it go?"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-save" @onclick="SaveAttempt">Save</button>
+                        <button class="btn-cancel" @onclick="() => showAttemptForm = false">Cancel</button>
+                    </div>
+                </div>
+            }
+
+            <div class="attempts-history">
+                <h3>History</h3>
+                @if (selectedDrillAttempts.Any())
+                {
+                    @foreach (var attempt in selectedDrillAttempts.Take(10))
+                    {
+                        <div class="attempt-row">
+                            <span class="attempt-date">@attempt.Date.ToString("MMM d")</span>
+                            <div class="attempt-score-bar">
+                                <div class="score-fill" style="width: @((double)attempt.Score / selectedDrill.MaxScore * 100)%"></div>
+                            </div>
+                            <span class="attempt-score">@attempt.Score</span>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="empty-state">No attempts yet. Give it a try!</p>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Drill> allDrills = DrillLibrary.GetAllDrills();
+    private DrillCategory? selectedCategory = null;
+    private Drill? selectedDrill = null;
+    private List<DrillAttempt> selectedDrillAttempts = new();
+    private Dictionary<string, int> drillBestScores = new();
+    private DrillAttempt newAttempt = new();
+    private bool showAttemptForm = false;
+
+    private IEnumerable<Drill> FilteredDrills =>
+        selectedCategory == null ? allDrills : allDrills.Where(d => d.Category == selectedCategory);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadBestScores();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadBestScores()
+    {
+        var allAttempts = await Data.GetDrillAttemptsAsync();
+        drillBestScores = allAttempts
+            .GroupBy(a => a.DrillId)
+            .ToDictionary(g => g.Key, g => g.Max(a => a.Score));
+    }
+
+    private async Task SelectDrill(Drill drill)
+    {
+        selectedDrill = drill;
+        selectedDrillAttempts = await Data.GetDrillAttemptsAsync(drill.Id);
+        newAttempt = new() { DrillId = drill.Id };
+    }
+
+    private async Task SaveAttempt()
+    {
+        newAttempt.DrillId = selectedDrill!.Id;
+        await Data.SaveDrillAttemptAsync(newAttempt);
+        selectedDrillAttempts = await Data.GetDrillAttemptsAsync(selectedDrill.Id);
+        await LoadBestScores();
+        newAttempt = new() { DrillId = selectedDrill.Id };
+        showAttemptForm = false;
+    }
+}

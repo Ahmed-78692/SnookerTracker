@@ -1,0 +1,82 @@
+@namespace SnookerTracker.Components
+
+<svg viewBox="0 0 400 200" class="snooker-table-svg" xmlns="http://www.w3.org/2000/svg">
+    <!-- Table bed -->
+    <rect x="10" y="10" width="380" height="180" rx="5" fill="#0d6b32" stroke="#4a2c0a" stroke-width="10"/>
+    
+    <!-- Cushion lines -->
+    <rect x="20" y="20" width="360" height="160" rx="2" fill="none" stroke="#0a5528" stroke-width="1"/>
+    
+    <!-- Baulk line -->
+    <line x1="100" y1="20" x2="100" y2="180" stroke="#ffffff" stroke-width="0.5" opacity="0.5"/>
+    
+    <!-- D arc -->
+    <path d="M 100,72 A 28,28 0 0,0 100,128" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.5"/>
+    
+    <!-- Spots -->
+    <!-- Baulk colors -->
+    <circle cx="80" cy="72" r="2.5" fill="#2ecc40" stroke="#000" stroke-width="0.3"/> <!-- Green -->
+    <circle cx="80" cy="100" r="2.5" fill="#8B4513" stroke="#000" stroke-width="0.3"/> <!-- Brown -->
+    <circle cx="80" cy="128" r="2.5" fill="#FFD700" stroke="#000" stroke-width="0.3"/> <!-- Yellow -->
+    
+    <!-- Blue spot -->
+    <circle cx="200" cy="100" r="2.5" fill="#2980b9" stroke="#000" stroke-width="0.3"/>
+    
+    <!-- Pink spot -->
+    <circle cx="290" cy="100" r="2.5" fill="#e84393" stroke="#000" stroke-width="0.3"/>
+    
+    <!-- Black spot -->
+    <circle cx="340" cy="100" r="2.5" fill="#1a1a1a" stroke="#333" stroke-width="0.3"/>
+    
+    <!-- Pockets -->
+    <circle cx="20" cy="20" r="6" fill="#1a1a1a"/>
+    <circle cx="200" cy="17" r="5" fill="#1a1a1a"/>
+    <circle cx="380" cy="20" r="6" fill="#1a1a1a"/>
+    <circle cx="20" cy="180" r="6" fill="#1a1a1a"/>
+    <circle cx="200" cy="183" r="5" fill="#1a1a1a"/>
+    <circle cx="380" cy="180" r="6" fill="#1a1a1a"/>
+    
+    <!-- Dynamic balls -->
+    @foreach (var ball in Balls)
+    {
+        <circle cx="@ball.X" cy="@ball.Y" r="@(ball.Radius > 0 ? ball.Radius : 4)" 
+                fill="@ball.Color" stroke="#000" stroke-width="0.4" opacity="@(ball.Opacity > 0 ? ball.Opacity : 1)"/>
+        @if (!string.IsNullOrEmpty(ball.Label))
+        {
+            @((MarkupString)$"<text x=\"{ball.X}\" y=\"{ball.Y + 1.5}\" text-anchor=\"middle\" font-size=\"4\" fill=\"white\" font-weight=\"bold\">{ball.Label}</text>")
+        }
+    }
+    
+    <!-- Dynamic arrows/paths -->
+    @foreach (var arrow in Arrows)
+    {
+        <line x1="@arrow.X1" y1="@arrow.Y1" x2="@arrow.X2" y2="@arrow.Y2" 
+              stroke="@(string.IsNullOrEmpty(arrow.Color) ? "#ffffff" : arrow.Color)" 
+              stroke-width="@(arrow.Width > 0 ? arrow.Width : 1)" 
+              stroke-dasharray="@(arrow.Dashed ? "3,2" : "")"
+              marker-end="url(#arrowhead)"
+              opacity="0.8"/>
+    }
+    
+    <!-- Dynamic zones/targets -->
+    @foreach (var zone in Zones)
+    {
+        <rect x="@zone.X" y="@zone.Y" width="@zone.Width" height="@zone.Height" 
+              fill="@(string.IsNullOrEmpty(zone.Color) ? "#4ecca3" : zone.Color)" 
+              opacity="0.2" rx="3" stroke="@(string.IsNullOrEmpty(zone.Color) ? "#4ecca3" : zone.Color)" stroke-width="0.5"/>
+    }
+    
+    <!-- Arrow marker definition -->
+    <defs>
+        <marker id="arrowhead" markerWidth="6" markerHeight="4" refX="5" refY="2" orient="auto">
+            <polygon points="0 0, 6 2, 0 4" fill="#ffffff" opacity="0.8"/>
+        </marker>
+    </defs>
+</svg>
+
+@code {
+    [Parameter] public List<BallPosition> Balls { get; set; } = new();
+    [Parameter] public List<ArrowPath> Arrows { get; set; } = new();
+    [Parameter] public List<TargetZone> Zones { get; set; } = new();
+}
+

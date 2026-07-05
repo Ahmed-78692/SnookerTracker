@@ -1,0 +1,38 @@
+﻿@inherits LayoutComponentBase
+
+<div class="app-container">
+    <main class="main-content">
+        @Body
+    </main>
+
+    <nav class="bottom-nav">
+        <NavLink class="nav-item" href="" Match="NavLinkMatch.All">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Home</span>
+        </NavLink>
+        <NavLink class="nav-item" href="practice">
+            <span class="nav-icon">🎱</span>
+            <span class="nav-label">Practice</span>
+        </NavLink>
+        <NavLink class="nav-item" href="drills">
+            <span class="nav-icon">🎯</span>
+            <span class="nav-label">Drills</span>
+        </NavLink>
+        <NavLink class="nav-item" href="breaks">
+            <span class="nav-icon">💯</span>
+            <span class="nav-label">Breaks</span>
+        </NavLink>
+        <NavLink class="nav-item" href="matches">
+            <span class="nav-icon">⚔️</span>
+            <span class="nav-label">Matches</span>
+        </NavLink>
+        <NavLink class="nav-item" href="goals">
+            <span class="nav-icon">🏆</span>
+            <span class="nav-label">Goals</span>
+        </NavLink>
+        <NavLink class="nav-item" href="settings">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">More</span>
+        </NavLink>
+    </nav>
+</div>

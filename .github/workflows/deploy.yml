@@ -1,0 +1,52 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Publish
+        run: dotnet publish -c Release -o release
+
+      - name: Change base href
+        run: sed -i 's|<base href="/" />|<base href="/SnookerTracker/" />|g' release/wwwroot/index.html
+
+      - name: Fix manifest start_url
+        run: sed -i 's|"start_url": "/"|"start_url": "/SnookerTracker/"|g' release/wwwroot/manifest.webmanifest
+
+      - name: Fix manifest scope
+        run: sed -i 's|"scope": "/"|"scope": "/SnookerTracker/"|g' release/wwwroot/manifest.webmanifest
+
+      - name: Add .nojekyll
+        run: touch release/wwwroot/.nojekyll
+
+      - name: Copy index.html to 404.html
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: release/wwwroot
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

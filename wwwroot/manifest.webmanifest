@@ -1,0 +1,23 @@
+{
+  "name": "Snooker Tracker",
+  "short_name": "SnookerTracker",
+  "description": "Track your snooker practice, breaks, and drills. Your path to becoming a champion.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}

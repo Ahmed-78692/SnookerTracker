@@ -1,0 +1,235 @@
+.breaks-page h1 {
+    color: #4ecca3;
+    font-size: 1.4rem;
+    margin-bottom: 1rem;
+}
+
+.btn-add {
+    width: 100%;
+    padding: 0.9rem;
+    background: #4ecca3;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+.break-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.summary-card {
+    background: #16213e;
+    border-radius: 10px;
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid #0f3460;
+}
+
+.summary-value {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #4ecca3;
+}
+
+.summary-label {
+    display: block;
+    font-size: 0.65rem;
+    color: #a0a0a0;
+    text-transform: uppercase;
+}
+
+.breaks-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.break-card {
+    background: #16213e;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    border: 1px solid #0f3460;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    position: relative;
+}
+
+.break-card.century {
+    border-color: #f1c40f;
+}
+
+.break-card.maximum {
+    border-color: #e74c3c;
+    background: linear-gradient(135deg, #16213e, #2c1810);
+}
+
+.break-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    min-width: 50px;
+}
+
+.break-card.century .break-score {
+    color: #f1c40f;
+}
+
+.break-card.maximum .break-score {
+    color: #e74c3c;
+}
+
+.break-info {
+    flex: 1;
+}
+
+.break-date {
+    color: #a0a0a0;
+    font-size: 0.8rem;
+}
+
+.break-badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 8px;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+.badge-century {
+    background: #f1c40f;
+    color: #1a1a2e;
+}
+
+.badge-max {
+    background: #e74c3c;
+    color: white;
+}
+
+.break-notes {
+    color: #a0a0a0;
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.25rem;
+}
+
+.btn-delete {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    opacity: 0.4;
+}
+
+.btn-delete:hover {
+    opacity: 1;
+}
+
+.empty-state {
+    text-align: center;
+    color: #a0a0a0;
+    padding: 2rem 1rem;
+}
+
+/* Form */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    background: #16213e;
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid #0f3460;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.form-group label {
+    color: #a0a0a0;
+    font-size: 0.85rem;
+}
+
+.form-group input[type="number"],
+.form-group textarea {
+    background: #1a1a2e;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: #ffffff;
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    min-height: 60px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-save {
+    flex: 2;
+    padding: 0.9rem;
+    background: #4ecca3;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-cancel {
+    flex: 1;
+    padding: 0.9rem;
+    background: transparent;
+    color: #a0a0a0;
+    border: 1px solid #0f3460;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.celebration {
+    background: linear-gradient(135deg, #f1c40f, #e67e22);
+    border-radius: 12px;
+    padding: 1.25rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    animation: pulse 0.5s ease-in-out;
+    cursor: pointer;
+}
+
+.celebration p {
+    color: #1a1a2e;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.tap-dismiss {
+    color: rgba(26, 26, 46, 0.6);
+    font-size: 0.75rem;
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+}

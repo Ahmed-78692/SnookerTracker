@@ -1,0 +1,95 @@
+﻿@page "/"
+@using SnookerTracker.Services
+@inject DataService Data
+
+<div class="dashboard">
+    <header class="dash-header">
+        <h1>🎱 Snooker Tracker</h1>
+        <p class="subtitle">Your path to champion</p>
+    </header>
+
+    @if (stats != null)
+    {
+        <div class="stats-grid">
+            <div class="stat-card highlight">
+                <span class="stat-value">@stats.HighestBreak</span>
+                <span class="stat-label">Highest Break</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">@stats.CurrentStreak 🔥</span>
+                <span class="stat-label">Day Streak</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">@stats.CenturyCount</span>
+                <span class="stat-label">Centuries</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">@stats.TotalSessions</span>
+                <span class="stat-label">Sessions</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">@FormatTime(stats.TotalPracticeMinutes)</span>
+                <span class="stat-label">Total Practice</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value">@stats.TotalDrillsCompleted</span>
+                <span class="stat-label">Drills Done</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Last 30 Days</h2>
+            <div class="mini-stats">
+                <div class="mini-stat">
+                    <span class="mini-value">@stats.Last30DaysSessions</span>
+                    <span class="mini-label">Sessions</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-value">@stats.Last30DaysAvgBreak</span>
+                    <span class="mini-label">Avg Break</span>
+                </div>
+                <div class="mini-stat">
+                    <span class="mini-value">@stats.WinRate%</span>
+                    <span class="mini-label">Win Rate</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="practice" class="action-btn primary">+ Log Practice</a>
+            <a href="breaks" class="action-btn secondary">+ Record Break</a>
+        </div>
+    }
+    else
+    {
+        <div class="loading">Loading your stats...</div>
+    }
+</div>
+
+@code {
+    private PlayerStats? stats;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                stats = await Data.GetStatsAsync();
+            }
+            catch
+            {
+                stats = new PlayerStats();
+            }
+            StateHasChanged();
+        }
+    }
+
+    private string FormatTime(int minutes)
+    {
+        if (minutes < 60) return $"{minutes}m";
+        var hours = minutes / 60;
+        var mins = minutes % 60;
+        return mins > 0 ? $"{hours}h {mins}m" : $"{hours}h";
+    }
+}

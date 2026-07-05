@@ -1,0 +1,100 @@
+.break-builder {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid #0f3460;
+    text-align: center;
+}
+
+.break-total {
+    margin-bottom: 1rem;
+}
+
+.total-label {
+    display: block;
+    color: #a0a0a0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+}
+
+.total-value {
+    display: block;
+    font-size: 3rem;
+    font-weight: 700;
+    color: #4ecca3;
+}
+
+.ball-sequence {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 1rem;
+    min-height: 28px;
+}
+
+.seq-ball {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+}
+
+.ball-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.ball-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.ball-btn:active {
+    transform: scale(0.9);
+}
+
+.red-btn {
+    width: 70px;
+    height: 70px;
+    font-size: 1.5rem;
+}
+
+.break-actions {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.btn-end {
+    padding: 0.6rem 1.5rem;
+    background: #4ecca3;
+    color: #1a1a2e;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-reset {
+    padding: 0.6rem 1.5rem;
+    background: #0f3460;
+    color: #a0a0a0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}

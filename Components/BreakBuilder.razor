@@ -1,0 +1,97 @@
+@namespace SnookerTracker.Components
+
+<div class="break-builder">
+    <div class="break-total">
+        <span class="total-label">Break</span>
+        <span class="total-value">@currentBreak</span>
+    </div>
+
+    <div class="ball-sequence">
+        @foreach (var ball in sequence.TakeLast(12))
+        {
+            <span class="seq-ball" style="background: @ball.Color; color: @ball.TextColor;">
+                @ball.Value
+            </span>
+        }
+    </div>
+
+    <div class="ball-buttons">
+        @if (expectingColor)
+        {
+            <button class="ball-btn" style="background: #FFD700" @onclick="() => AddBall(2, ColorYellow, TextDark)">2</button>
+            <button class="ball-btn" style="background: #2ecc40" @onclick="() => AddBall(3, ColorGreen, TextDark)">3</button>
+            <button class="ball-btn" style="background: #8B4513" @onclick="() => AddBall(4, ColorBrown, TextWhite)">4</button>
+            <button class="ball-btn" style="background: #2980b9" @onclick="() => AddBall(5, ColorBlue, TextWhite)">5</button>
+            <button class="ball-btn" style="background: #e84393" @onclick="() => AddBall(6, ColorPink, TextWhite)">6</button>
+            <button class="ball-btn" style="background: #1a1a1a; border: 1px solid #444" @onclick="() => AddBall(7, ColorBlack, TextWhite)">7</button>
+        }
+        else
+        {
+            <button class="ball-btn red-btn" style="background: #e74c3c" @onclick="() => AddBall(1, ColorRed, TextWhite)">1</button>
+        }
+    </div>
+
+    <div class="break-actions">
+        <button class="btn-end" @onclick="EndBreak">End Break</button>
+        <button class="btn-reset" @onclick="Reset">Reset</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<int> OnBreakComplete { get; set; }
+
+    private const string ColorRed = "#e74c3c";
+    private const string ColorYellow = "#FFD700";
+    private const string ColorGreen = "#2ecc40";
+    private const string ColorBrown = "#8B4513";
+    private const string ColorBlue = "#2980b9";
+    private const string ColorPink = "#e84393";
+    private const string ColorBlack = "#1a1a1a";
+    private const string TextWhite = "#fff";
+    private const string TextDark = "#1a1a2e";
+
+    private int currentBreak = 0;
+    private bool expectingColor = false;
+    private int redsRemaining = 15;
+    private List<BallEntry> sequence = new();
+
+    private void AddBall(int value, string color, string textColor)
+    {
+        currentBreak += value;
+        sequence.Add(new BallEntry { Value = value, Color = color, TextColor = textColor });
+        
+        if (value == 1)
+        {
+            redsRemaining--;
+            expectingColor = true;
+        }
+        else
+        {
+            expectingColor = false;
+        }
+    }
+
+    private async Task EndBreak()
+    {
+        if (currentBreak > 0)
+        {
+            await OnBreakComplete.InvokeAsync(currentBreak);
+        }
+        Reset();
+    }
+
+    private void Reset()
+    {
+        currentBreak = 0;
+        expectingColor = false;
+        redsRemaining = 15;
+        sequence.Clear();
+    }
+
+    private class BallEntry
+    {
+        public int Value { get; set; }
+        public string Color { get; set; } = "";
+        public string TextColor { get; set; } = "";
+    }
+}

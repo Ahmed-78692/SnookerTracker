@@ -1,0 +1,68 @@
+@namespace SnookerTracker.Components
+@implements IDisposable
+
+<div class="timer-container">
+    <div class="timer-display">
+        <span class="timer-value">@FormatTime(elapsedSeconds)</span>
+    </div>
+    <div class="timer-controls">
+        @if (!isRunning)
+        {
+            <button class="timer-btn start" @onclick="Start">▶ Start</button>
+        }
+        else
+        {
+            <button class="timer-btn stop" @onclick="Stop">⏸ Pause</button>
+        }
+        @if (elapsedSeconds > 0 && !isRunning)
+        {
+            <button class="timer-btn reset" @onclick="Reset">↺ Reset</button>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public EventCallback<int> OnTimerStop { get; set; }
+    
+    private int elapsedSeconds = 0;
+    private bool isRunning = false;
+    private Timer? timer;
+
+    private void Start()
+    {
+        isRunning = true;
+        timer = new Timer(_ =>
+        {
+            elapsedSeconds++;
+            InvokeAsync(StateHasChanged);
+        }, null, 1000, 1000);
+    }
+
+    private async Task Stop()
+    {
+        isRunning = false;
+        timer?.Dispose();
+        timer = null;
+        await OnTimerStop.InvokeAsync(elapsedSeconds / 60);
+    }
+
+    private void Reset()
+    {
+        elapsedSeconds = 0;
+    }
+
+    private string FormatTime(int totalSeconds)
+    {
+        var hours = totalSeconds / 3600;
+        var minutes = (totalSeconds % 3600) / 60;
+        var seconds = totalSeconds % 60;
+        return hours > 0 
+            ? $"{hours:D2}:{minutes:D2}:{seconds:D2}" 
+            : $"{minutes:D2}:{seconds:D2}";
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+    }
+}
