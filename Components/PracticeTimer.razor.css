@@ -1,21 +1,19 @@
 .timer-container {
-    background: #16213e;
-    border-radius: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
     padding: 1.5rem;
     text-align: center;
-    border: 1px solid #0f3460;
-    margin-bottom: 1rem;
+    border: 1px solid var(--border);
 }
 
-.timer-display {
-    margin-bottom: 1rem;
-}
+.timer-display { margin-bottom: 1rem; }
 
 .timer-value {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: #4ecca3;
-    font-family: 'Courier New', monospace;
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
 }
 
 .timer-controls {
@@ -25,25 +23,16 @@
 }
 
 .timer-btn {
-    padding: 0.6rem 1.5rem;
+    padding: 0.7rem 2rem;
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    border-radius: var(--radius-xs);
+    font-weight: 700;
+    font-size: 0.85rem;
     cursor: pointer;
+    transition: all 0.15s;
 }
 
-.timer-btn.start {
-    background: #4ecca3;
-    color: #1a1a2e;
-}
-
-.timer-btn.stop {
-    background: #e94560;
-    color: white;
-}
-
-.timer-btn.reset {
-    background: #0f3460;
-    color: #a0a0a0;
-}
+.timer-btn:active { transform: scale(0.95); }
+.timer-btn.start { background: var(--accent); color: var(--bg-primary); }
+.timer-btn.stop { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); }
+.timer-btn.reset { background: var(--bg-secondary); color: var(--text-muted); border: 1px solid var(--border); }

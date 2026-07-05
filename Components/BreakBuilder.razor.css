@@ -1,77 +1,84 @@
 .break-builder {
-    background: #16213e;
-    border-radius: 12px;
-    padding: 1.25rem;
-    border: 1px solid #0f3460;
+    background: var(--bg-card);
+    border-radius: var(--radius-sm);
+    padding: 1.5rem;
+    border: 1px solid var(--border);
     text-align: center;
 }
 
-.break-total {
-    margin-bottom: 1rem;
-}
+.break-total { margin-bottom: 0.75rem; }
 
 .total-label {
     display: block;
-    color: #a0a0a0;
-    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-size: 0.7rem;
     text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 700;
 }
 
 .total-value {
     display: block;
-    font-size: 3rem;
-    font-weight: 700;
-    color: #4ecca3;
+    font-size: 3.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), #00f5d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.03em;
 }
 
 .ball-sequence {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 3px;
     justify-content: center;
     margin-bottom: 1rem;
-    min-height: 28px;
+    min-height: 24px;
+    padding: 0.5rem;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-xs);
 }
 
 .seq-ball {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.65rem;
-    font-weight: 700;
+    font-size: 0.6rem;
+    font-weight: 800;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .ball-buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.6rem;
     justify-content: center;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
     flex-wrap: wrap;
 }
 
 .ball-btn {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     border-radius: 50%;
     border: none;
-    font-size: 1.2rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 800;
     color: white;
     cursor: pointer;
-    transition: transform 0.1s;
+    transition: all 0.1s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-.ball-btn:active {
-    transform: scale(0.9);
-}
+.ball-btn:active { transform: scale(0.85); }
 
 .red-btn {
-    width: 70px;
-    height: 70px;
-    font-size: 1.5rem;
+    width: 64px;
+    height: 64px;
+    font-size: 1.4rem;
 }
 
 .break-actions {
@@ -81,20 +88,25 @@
 }
 
 .btn-end {
-    padding: 0.6rem 1.5rem;
-    background: #4ecca3;
-    color: #1a1a2e;
+    padding: 0.7rem 1.75rem;
+    background: var(--accent);
+    color: var(--bg-primary);
     border: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: var(--radius-xs);
+    font-weight: 700;
+    font-size: 0.85rem;
     cursor: pointer;
 }
 
+.btn-end:active { transform: scale(0.95); }
+
 .btn-reset {
-    padding: 0.6rem 1.5rem;
-    background: #0f3460;
-    color: #a0a0a0;
-    border: none;
-    border-radius: 8px;
+    padding: 0.7rem 1.75rem;
+    background: var(--bg-secondary);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
 }
