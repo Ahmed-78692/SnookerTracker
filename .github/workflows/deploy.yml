@@ -25,7 +25,7 @@ jobs:
           dotnet-version: '9.0.x'
 
       - name: Publish
-        run: dotnet publish -c Release -o release
+        run: dotnet publish SnookerTracker.csproj -c Release -o release
 
       - name: Change base href
         run: sed -i 's|<base href="/" />|<base href="/SnookerTracker/" />|g' release/wwwroot/index.html
