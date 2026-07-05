@@ -78,15 +78,18 @@
             </div>
             <div class="form-group">
                 <label>Table Photo / Screenshot</label>
-                <div class="photo-upload">
-                    <InputFile OnChange="HandlePhotoUpload" accept="image/*" />
+                <div class="photo-upload-wrap">
                     @if (!string.IsNullOrEmpty(currentDrill.ImageBase64))
                     {
                         <img class="photo-preview" src="@currentDrill.ImageBase64" alt="Preview" />
+                        <button class="btn-remove-photo" @onclick="() => currentDrill.ImageBase64 = null">Remove Photo</button>
                     }
                     else
                     {
-                        <div class="photo-placeholder">📷 Tap to upload table setup photo</div>
+                        <label class="photo-upload-label">
+                            <InputFile OnChange="HandlePhotoUpload" accept="image/*" class="file-input-hidden" />
+                            <span class="photo-placeholder">📷 Tap to upload table setup photo</span>
+                        </label>
                     }
                 </div>
             </div>
